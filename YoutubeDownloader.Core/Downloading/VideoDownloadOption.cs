@@ -1,7 +1,7 @@
-﻿using Lazy;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Lazy;
 using YoutubeDownloader.Core.Utils.Extensions;
 using YoutubeExplode.Videos.Streams;
 

@@ -20,10 +20,10 @@ namespace YoutubeDownloader.Core.Downloading
         )
         {
             var tempPath = Path.ChangeExtension(path, "srt");
-            var manifest = await _youtube.Videos.ClosedCaptions.GetManifestAsync(
-                video.Id,
-                cancellationToken
-            );
+            var manifest = await _youtube
+                .Videos
+                .ClosedCaptions
+                .GetManifestAsync(video.Id, cancellationToken);
             bool isChineseCC = false;
             if (manifest.Tracks.Count != 0)
             {
@@ -37,11 +37,10 @@ namespace YoutubeDownloader.Core.Downloading
                 {
                     trackInfo = manifest.GetByLanguage("en");
                 }
-                await _youtube.Videos.ClosedCaptions.DownloadAsync(
-                    trackInfo,
-                    tempPath,
-                    cancellationToken: cancellationToken
-                );
+                await _youtube
+                    .Videos
+                    .ClosedCaptions
+                    .DownloadAsync(trackInfo, tempPath, cancellationToken: cancellationToken);
                 return Tuple.Create(isChineseCC, tempPath);
             }
             return Tuple.Create(isChineseCC, "");

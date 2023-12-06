@@ -1,9 +1,9 @@
-﻿using Gress;
-using Stylet;
-using System;
+﻿using System;
 using System.IO;
 using System.Threading;
 using System.Windows;
+using Gress;
+using Stylet;
 using YoutubeDownloader.Core.Downloading;
 using YoutubeDownloader.Utils;
 using YoutubeDownloader.ViewModels.Dialogs;

@@ -1,7 +1,7 @@
-﻿using MaterialDesignThemes.Wpf;
-using System;
+﻿using System;
 using System.Reflection;
 using System.Windows.Media;
+using MaterialDesignThemes.Wpf;
 using YoutubeDownloader.Utils;
 
 namespace YoutubeDownloader;

@@ -61,7 +61,8 @@ namespace YoutubeDownloader.Core.Downloading
                 var texts = new List<string>();
                 foreach (var element in jsonDocument.RootElement.EnumerateArray())
                 {
-                    var text = element.GetProperty("translations")[0]
+                    var text = element
+                        .GetProperty("translations")[0]
                         .GetProperty("text")
                         .ToString();
                     texts.AddRange(text.Split('\n'));

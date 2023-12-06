@@ -19,7 +19,8 @@ namespace YoutubeDownloader.Core.Downloading
         {
             var tempPath = Path.ChangeExtension(path, "jpg");
             var thumbnailUrl =
-                video.Thumbnails
+                video
+                    .Thumbnails
                     .Where(
                         t =>
                             string.Equals(

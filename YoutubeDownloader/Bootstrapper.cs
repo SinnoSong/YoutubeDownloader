@@ -1,10 +1,9 @@
-﻿using Stylet;
+﻿using System.Net;
+using Stylet;
 using StyletIoC;
-using System.Net;
 using YoutubeDownloader.Services;
 using YoutubeDownloader.ViewModels;
 using YoutubeDownloader.ViewModels.Framework;
-
 #if !DEBUG
 using System.Windows;
 using System.Windows.Threading;
