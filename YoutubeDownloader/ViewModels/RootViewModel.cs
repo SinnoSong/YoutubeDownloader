@@ -1,7 +1,7 @@
-﻿using System;
-using System.Threading.Tasks;
-using MaterialDesignThemes.Wpf;
+﻿using MaterialDesignThemes.Wpf;
 using Stylet;
+using System;
+using System.Threading.Tasks;
 using YoutubeDownloader.Services;
 using YoutubeDownloader.Utils;
 using YoutubeDownloader.ViewModels.Components;
@@ -120,8 +120,8 @@ public class RootViewModel : Screen
         {
             Notifications.Enqueue(
                 $"Successfully updated to {App.Name} v{App.VersionString}",
-                "WHAT'S NEW",
-                () => ProcessEx.StartShellExecute(App.LatestReleaseUrl)
+                "CHANGELOG",
+                () => ProcessEx.StartShellExecute(App.ChangelogUrl)
             );
 
             _settingsService.LastAppVersion = App.Version;

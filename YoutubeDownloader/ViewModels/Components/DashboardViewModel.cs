@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Gress;
+using Gress.Completable;
+using Stylet;
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Gress;
-using Gress.Completable;
-using Stylet;
 using YoutubeDownloader.Core.Downloading;
 using YoutubeDownloader.Core.Resolving;
 using YoutubeDownloader.Core.Tagging;

@@ -1,5 +1,5 @@
-﻿using System;
-using Stylet;
+﻿using Stylet;
+using System;
 
 namespace YoutubeDownloader.ViewModels.Framework;
 

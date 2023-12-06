@@ -1,7 +1,7 @@
-﻿using System;
+﻿using MaterialDesignThemes.Wpf;
+using System;
 using System.Reflection;
 using System.Windows.Media;
-using MaterialDesignThemes.Wpf;
 using YoutubeDownloader.Utils;
 
 namespace YoutubeDownloader;
@@ -18,7 +18,7 @@ public partial class App
 
     public static string ProjectUrl { get; } = "https://github.com/Tyrrrz/YoutubeDownloader";
 
-    public static string LatestReleaseUrl { get; } = ProjectUrl + "/releases/latest";
+    public static string ChangelogUrl { get; } = ProjectUrl + "/blob/master/Changelog.md";
 }
 
 public partial class App

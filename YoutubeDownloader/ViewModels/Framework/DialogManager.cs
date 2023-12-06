@@ -1,10 +1,9 @@
-﻿using System;
+﻿using MaterialDesignThemes.Wpf;
+using Stylet;
+using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using MaterialDesignThemes.Wpf;
-using Microsoft.Win32;
-using Stylet;
 
 namespace YoutubeDownloader.ViewModels.Framework;
 
@@ -55,7 +54,7 @@ public class DialogManager : IDisposable
 
     public string? PromptSaveFilePath(string filter = "All files|*.*", string defaultFilePath = "")
     {
-        var dialog = new SaveFileDialog
+        var dialog = new VistaSaveFileDialog
         {
             Filter = filter,
             AddExtension = true,
@@ -68,8 +67,9 @@ public class DialogManager : IDisposable
 
     public string? PromptDirectoryPath(string defaultDirPath = "")
     {
-        var dialog = new OpenFolderDialog { InitialDirectory = defaultDirPath };
-        return dialog.ShowDialog() == true ? dialog.FolderName : null;
+        var dialog = new VistaFolderBrowserDialog { SelectedPath = defaultDirPath };
+
+        return dialog.ShowDialog() == true ? dialog.SelectedPath : null;
     }
 
     public void Dispose()

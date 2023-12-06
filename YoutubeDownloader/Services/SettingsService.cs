@@ -1,13 +1,13 @@
-﻿using System;
+﻿using Cogwheel;
+using Microsoft.Win32;
+using PropertyChanged;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Cogwheel;
-using Microsoft.Win32;
-using PropertyChanged;
 using YoutubeDownloader.Core.Downloading;
 using Container = YoutubeExplode.Videos.Streams.Container;
 
@@ -70,8 +70,7 @@ public partial class SettingsService
     {
         try
         {
-            return Registry
-                .CurrentUser
+            return Registry.CurrentUser
                 .OpenSubKey(
                     "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
                     false
