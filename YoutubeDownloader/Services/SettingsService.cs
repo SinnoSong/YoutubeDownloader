@@ -1,55 +1,76 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Avalonia;
+using Avalonia.Platform;
 using Cogwheel;
-using Microsoft.Win32;
-using PropertyChanged;
+using CommunityToolkit.Mvvm.ComponentModel;
 using YoutubeDownloader.Core.Downloading;
 using Container = YoutubeExplode.Videos.Streams.Container;
 
 namespace YoutubeDownloader.Services;
 
-[AddINotifyPropertyChangedInterface]
-public partial class SettingsService : SettingsBase, INotifyPropertyChanged
+[INotifyPropertyChanged]
+public partial class SettingsService()
+    : SettingsBase(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Settings.dat"))
 {
-    public bool IsUkraineSupportMessageEnabled { get; set; } = true;
+    [ObservableProperty]
+    private bool _isUkraineSupportMessageEnabled = true;
 
-    public bool IsAutoUpdateEnabled { get; set; } = false;
+    [ObservableProperty]
+    private bool _isAutoUpdateEnabled = true;
 
-    public bool IsDarkModeEnabled { get; set; } = IsDarkModeEnabledByDefault();
+    [ObservableProperty]
+    private bool _isDarkModeEnabled;
 
-    public bool IsAuthPersisted { get; set; } = true;
+    [ObservableProperty]
+    private bool _isAuthPersisted = true;
 
+    [ObservableProperty]
+    private bool _shouldInjectSubtitles = true;
     public bool ShouldInjectTags { get; set; } = true;
     public bool ShouldDownloadThumbnail { get; set; } = true;
     public bool ShouldDownloadClosedCaptions { get; set; } = true;
     public bool ShouldTranslateCCToChinese { get; set; } = true;
 
-    public bool ShouldSkipExistingFiles { get; set; }
+    [ObservableProperty]
+    private bool _shouldInjectTags = true;
 
+    [ObservableProperty]
+    private bool _shouldSkipExistingFiles;
     public string FileNameTemplate { get; set; } = "$title";
     public string TranslateKey { get; set; } = "";
     public string BaiduAppId { get; set; } = "";
 
-    public int ParallelLimit { get; set; } = 2;
+    [ObservableProperty]
+    private string _fileNameTemplate = "$title";
 
-    public Version? LastAppVersion { get; set; }
+    [ObservableProperty]
+    private int _parallelLimit = 2;
 
-    public IReadOnlyList<Cookie>? LastAuthCookies { get; set; }
+    [ObservableProperty]
+    private IReadOnlyList<Cookie>? _lastAuthCookies;
 
-    // STJ cannot properly serialize immutable structs
-    [JsonConverter(typeof(ContainerJsonConverter))]
-    public Container LastContainer { get; set; } = Container.Mp4;
+    [ObservableProperty]
+    [property: JsonConverter(typeof(ContainerJsonConverter))]
+    private Container _lastContainer = Container.Mp4;
 
-    public VideoQualityPreference LastVideoQualityPreference { get; set; } =
-        VideoQualityPreference.Highest;
+    [ObservableProperty]
+    private VideoQualityPreference _lastVideoQualityPreference = VideoQualityPreference.Highest;
 
-    public SettingsService()
-        : base(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Settings.dat")) { }
+    public override void Reset()
+    {
+        base.Reset();
+
+        // Reset the dark mode setting separately because its default value is evaluated dynamically
+        // and cannot be set by the field initializer.
+        IsDarkModeEnabled =
+            Application.Current?.PlatformSettings?.GetColorValues().ThemeVariant
+            == PlatformThemeVariant.Dark;
+    }
 
     public override void Save()
     {
@@ -61,28 +82,6 @@ public partial class SettingsService : SettingsBase, INotifyPropertyChanged
         base.Save();
 
         LastAuthCookies = lastAuthCookies;
-    }
-}
-
-public partial class SettingsService
-{
-    private static bool IsDarkModeEnabledByDefault()
-    {
-        try
-        {
-            return Registry
-                .CurrentUser
-                .OpenSubKey(
-                    "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
-                    false
-                )
-                ?.GetValue("AppsUseLightTheme")
-                is 0;
-        }
-        catch
-        {
-            return false;
-        }
     }
 }
 

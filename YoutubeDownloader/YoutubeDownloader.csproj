@@ -2,42 +2,63 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <UseWPF>true</UseWPF>
-    <ApplicationIcon>../favicon.ico</ApplicationIcon>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <ApplicationIcon>..\favicon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
-    <Resource Include="../favicon.ico" />
+    <AvaloniaResource Include="..\favicon.ico" Link="favicon.ico" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AsyncImageLoader.Avalonia" Version="3.2.1" />
+    <PackageReference Include="Avalonia" Version="11.0.10" />
+    <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.0.10" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.0.10" />
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.0.10" Condition="'$(Configuration)' == 'Debug'" />
     <PackageReference Include="Cogwheel" Version="2.0.4" />
-    <PackageReference Include="CSharpier.MsBuild" Version="0.26.4" PrivateAssets="all" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+    <PackageReference Include="CSharpier.MsBuild" Version="0.28.2" PrivateAssets="all" />
     <PackageReference Include="Deorcify" Version="1.0.2" PrivateAssets="all" />
-    <PackageReference Include="DotnetRuntimeBootstrapper" Version="2.5.1" PrivateAssets="all" />
+    <PackageReference Include="DialogHost.Avalonia" Version="0.7.7" />
+    <PackageReference Include="DotnetRuntimeBootstrapper" Version="2.5.4" PrivateAssets="all" />
     <PackageReference Include="Gress" Version="2.1.1" />
-    <PackageReference Include="MaterialDesignColors" Version="2.1.4" />
-    <PackageReference Include="MaterialDesignThemes" Version="4.9.0" />
-    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2151.40" />
-    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.77" />
-    <PackageReference Include="Onova" Version="2.6.10" />
-    <PackageReference Include="PropertyChanged.Fody" Version="4.1.0" PrivateAssets="all" />
-    <PackageReference Include="Stylet" Version="1.3.6" />
+    <PackageReference Include="Material.Avalonia" Version="3.5.0" />
+    <PackageReference Include="Material.Avalonia.DataGrid" Version="3.5.0" />
+    <PackageReference Include="Material.Icons.Avalonia" Version="2.1.9" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="Onova" Version="2.6.11" />
+    <PackageReference Include="WebView.Avalonia" Version="11.0.0.1" />
+    <PackageReference Include="WebView.Avalonia.Desktop" Version="11.0.0.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\YoutubeDownloader.Core\YoutubeDownloader.Core.csproj" />
   </ItemGroup>
 
-  <!-- This downloads FFmpeg and copies it to the output directory-->
+  <!-- Download FFmpeg and copy it to the output directory-->
+  <PropertyGroup>
+    <FFmpegPlatform>$(RuntimeIdentifier)</FFmpegPlatform>
+    <FFmpegPlatform Condition="'$(FFmpegPlatform)' == '' AND $([MSBuild]::IsOsPlatform('Windows')) AND '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'Arm64'">win-arm64</FFmpegPlatform>
+    <FFmpegPlatform Condition="'$(FFmpegPlatform)' == '' AND $([MSBuild]::IsOsPlatform('Windows')) AND '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'X86'">win-x86</FFmpegPlatform>
+    <FFmpegPlatform Condition="'$(FFmpegPlatform)' == '' AND $([MSBuild]::IsOsPlatform('Windows')) AND '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'X64'">win-x64</FFmpegPlatform>
+    <FFmpegPlatform Condition="'$(FFmpegPlatform)' == '' AND $([MSBuild]::IsOsPlatform('Linux')) AND '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'Arm64'">linux-arm64</FFmpegPlatform>
+    <FFmpegPlatform Condition="'$(FFmpegPlatform)' == '' AND $([MSBuild]::IsOsPlatform('Linux')) AND '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'X86'">linux-x86</FFmpegPlatform>
+    <FFmpegPlatform Condition="'$(FFmpegPlatform)' == '' AND $([MSBuild]::IsOsPlatform('Linux')) AND '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'X64'">linux-x64</FFmpegPlatform>
+    <FFmpegPlatform Condition="'$(FFmpegPlatform)' == '' AND $([MSBuild]::IsOsPlatform('OSX')) AND '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'Arm64'">osx-arm64</FFmpegPlatform>
+    <FFmpegPlatform Condition="'$(FFmpegPlatform)' == '' AND $([MSBuild]::IsOsPlatform('OSX')) AND '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'X64'">osx-x64</FFmpegPlatform>
+    <FFmpegFileName Condition="$(FFmpegPlatform.StartsWith('win'))">ffmpeg.exe</FFmpegFileName>
+    <FFmpegFileName Condition="'$(FFmpegFileName)' == ''">ffmpeg</FFmpegFileName>
+  </PropertyGroup>
+  
   <Target Name="Download FFmpeg before build" BeforeTargets="PreBuildEvent">
-    <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(ProjectDir)/DownloadFFmpeg.ps1&quot;" />
-    <Copy SourceFiles="$(ProjectDir)/ffmpeg.exe" DestinationFiles="$(OutDir)/ffmpeg.exe" SkipUnchangedFiles="true" />
+    <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(ProjectDir)/DownloadFFmpeg.ps1&quot; -Platform $(FFmpegPlatform) -OutputPath &quot;$(ProjectDir)/$(FFmpegFileName)&quot;" LogStandardErrorAsError="true" />
+    <Copy SourceFiles="$(ProjectDir)/$(FFmpegFileName)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
   </Target>
 
   <Target Name="Download FFmpeg before publish" BeforeTargets="PrepareForPublish">
-    <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(ProjectDir)/DownloadFFmpeg.ps1&quot;" />
-    <Copy SourceFiles="$(ProjectDir)/ffmpeg.exe" DestinationFiles="$(PublishDir)/ffmpeg.exe" SkipUnchangedFiles="true" />
+    <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(ProjectDir)/DownloadFFmpeg.ps1&quot; -Platform $(FFmpegPlatform) -OutputPath &quot;$(ProjectDir)/$(FFmpegFileName)&quot;" LogStandardErrorAsError="true" />
+    <Copy SourceFiles="$(ProjectDir)/$(FFmpegFileName)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
   </Target>
 
 </Project>

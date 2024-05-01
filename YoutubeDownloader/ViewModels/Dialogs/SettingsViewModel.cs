@@ -1,12 +1,23 @@
 ﻿using System;
+using YoutubeDownloader.Framework;
 using YoutubeDownloader.Services;
-using YoutubeDownloader.ViewModels.Framework;
+using YoutubeDownloader.Utils;
+using YoutubeDownloader.Utils.Extensions;
 
 namespace YoutubeDownloader.ViewModels.Dialogs;
 
-public class SettingsViewModel : DialogScreen
+public class SettingsViewModel : DialogViewModelBase
 {
     private readonly SettingsService _settingsService;
+
+    private readonly DisposableCollector _eventRoot = new();
+
+    public SettingsViewModel(SettingsService settingsService)
+    {
+        _settingsService = settingsService;
+
+        _eventRoot.Add(_settingsService.WatchAllProperties(OnAllPropertiesChanged));
+    }
 
     public bool IsAutoUpdateEnabled
     {
@@ -24,6 +35,12 @@ public class SettingsViewModel : DialogScreen
     {
         get => _settingsService.IsAuthPersisted;
         set => _settingsService.IsAuthPersisted = value;
+    }
+
+    public bool ShouldInjectSubtitles
+    {
+        get => _settingsService.ShouldInjectSubtitles;
+        set => _settingsService.ShouldInjectSubtitles = value;
     }
 
     public bool ShouldInjectTags
@@ -80,5 +97,13 @@ public class SettingsViewModel : DialogScreen
         set => _settingsService.ParallelLimit = Math.Clamp(value, 1, 10);
     }
 
-    public SettingsViewModel(SettingsService settingsService) => _settingsService = settingsService;
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _eventRoot.Dispose();
+        }
+
+        base.Dispose(disposing);
+    }
 }

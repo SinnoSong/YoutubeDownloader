@@ -2,15 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using Stylet;
+using YoutubeDownloader.Framework;
 using YoutubeDownloader.Services;
-using YoutubeDownloader.ViewModels.Framework;
+using YoutubeDownloader.Utils;
+using YoutubeDownloader.Utils.Extensions;
 
 namespace YoutubeDownloader.ViewModels.Dialogs;
 
-public class AuthSetupViewModel : DialogScreen
+public class AuthSetupViewModel : DialogViewModelBase
 {
     private readonly SettingsService _settingsService;
+
+    private readonly DisposableCollector _eventRoot = new();
 
     public IReadOnlyList<Cookie>? Cookies
     {
@@ -21,18 +24,34 @@ public class AuthSetupViewModel : DialogScreen
     public bool IsAuthenticated =>
         Cookies?.Any() == true
         &&
-        // None of the cookies should be expired
-        Cookies.All(c => !c.Expired && (c.Expires == default || c.Expires > DateTimeOffset.Now));
+        // None of the '__SECURE' cookies should be expired
+        Cookies
+            .Where(c => c.Name.StartsWith("__SECURE", StringComparison.OrdinalIgnoreCase))
+            .All(c => !c.Expired && c.Expires.ToUniversalTime() > DateTime.UtcNow);
 
     public AuthSetupViewModel(SettingsService settingsService)
     {
         _settingsService = settingsService;
 
-        _settingsService.BindAndInvoke(
-            o => o.LastAuthCookies,
-            (_, _) => NotifyOfPropertyChange(() => Cookies)
+        _eventRoot.Add(
+            _settingsService.WatchProperty(
+                o => o.LastAuthCookies,
+                () =>
+                {
+                    OnPropertyChanged(nameof(Cookies));
+                    OnPropertyChanged(nameof(IsAuthenticated));
+                }
+            )
         );
+    }
 
-        this.BindAndInvoke(o => o.Cookies, (_, _) => NotifyOfPropertyChange(() => IsAuthenticated));
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _eventRoot.Dispose();
+        }
+
+        base.Dispose(disposing);
     }
 }

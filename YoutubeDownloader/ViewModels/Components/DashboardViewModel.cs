@@ -1,30 +1,39 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Gress;
 using Gress.Completable;
-using Stylet;
 using YoutubeDownloader.Core.Downloading;
 using YoutubeDownloader.Core.Resolving;
 using YoutubeDownloader.Core.Tagging;
+using YoutubeDownloader.Framework;
 using YoutubeDownloader.Services;
 using YoutubeDownloader.Utils;
-using YoutubeDownloader.ViewModels.Dialogs;
-using YoutubeDownloader.ViewModels.Framework;
+using YoutubeDownloader.Utils.Extensions;
 using YoutubeExplode.Exceptions;
 
 namespace YoutubeDownloader.ViewModels.Components;
 
-public class DashboardViewModel : PropertyChangedBase, IDisposable
+public partial class DashboardViewModel : ViewModelBase
 {
-    private readonly IViewModelFactory _viewModelFactory;
+    private readonly ViewModelManager _viewModelManager;
     private readonly DialogManager _dialogManager;
     private readonly SettingsService _settingsService;
 
-    private readonly AutoResetProgressMuxer _progressMuxer;
+    private readonly DisposableCollector _eventRoot = new();
     private readonly ResizableSemaphore _downloadSemaphore = new();
+    private readonly AutoResetProgressMuxer _progressMuxer;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsProgressIndeterminate))]
+    [NotifyCanExecuteChangedFor(nameof(ProcessQueryCommand))]
+    [NotifyCanExecuteChangedFor(nameof(ShowAuthSetupCommand))]
+    [NotifyCanExecuteChangedFor(nameof(ShowSettingsCommand))]
+    private bool _isBusy;
     private readonly QueryResolver _queryResolver = new();
     private readonly VideoDownloader _videoDownloader = new();
     private readonly MediaTagInjector _mediaTagInjector = new();
@@ -34,99 +43,101 @@ public class DashboardViewModel : PropertyChangedBase, IDisposable
 
     public bool IsBusy { get; private set; }
 
-    public ProgressContainer<Percentage> Progress { get; } = new();
-
-    public bool IsProgressIndeterminate => IsBusy && Progress.Current.Fraction is <= 0 or >= 1;
-
-    public string? Query { get; set; }
-
-    public BindableCollection<DownloadViewModel> Downloads { get; } = new();
-
-    public bool IsDownloadsAvailable => Downloads.Any();
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ProcessQueryCommand))]
+    private string? _query;
 
     public DashboardViewModel(
-        IViewModelFactory viewModelFactory,
+        ViewModelManager viewModelManager,
         DialogManager dialogManager,
         SettingsService settingsService
     )
     {
-        _viewModelFactory = viewModelFactory;
+        _viewModelManager = viewModelManager;
         _dialogManager = dialogManager;
         _settingsService = settingsService;
 
         _progressMuxer = Progress.CreateMuxer().WithAutoReset();
 
-        _settingsService.BindAndInvoke(
-            o => o.ParallelLimit,
-            (_, e) => _downloadSemaphore.MaxCount = e.NewValue
+        _eventRoot.Add(
+            _settingsService.WatchProperty(
+                o => o.ParallelLimit,
+                () => _downloadSemaphore.MaxCount = _settingsService.ParallelLimit
+            )
         );
 
-        Progress.Bind(
-            o => o.Current,
-            (_, _) => NotifyOfPropertyChange(() => IsProgressIndeterminate)
+        _eventRoot.Add(
+            Progress.WatchProperty(
+                o => o.Current,
+                () => OnPropertyChanged(nameof(IsProgressIndeterminate))
+            )
         );
-
-        Downloads.Bind(o => o.Count, (_, _) => NotifyOfPropertyChange(() => IsDownloadsAvailable));
     }
 
-    public bool CanShowAuthSetup => !IsBusy;
+    public ProgressContainer<Percentage> Progress { get; } = new();
 
-    public async void ShowAuthSetup() =>
-        await _dialogManager.ShowDialogAsync(_viewModelFactory.CreateAuthSetupViewModel());
+    public ObservableCollection<DownloadViewModel> Downloads { get; } = [];
 
-    public bool CanShowSettings => !IsBusy;
+    public bool IsProgressIndeterminate => IsBusy && Progress.Current.Fraction is <= 0 or >= 1;
 
-    public async void ShowSettings() =>
-        await _dialogManager.ShowDialogAsync(_viewModelFactory.CreateSettingsViewModel());
+    private bool CanShowAuthSetup() => !IsBusy;
 
-    private void EnqueueDownload(DownloadViewModel download, int position = 0)
+    [RelayCommand(CanExecute = nameof(CanShowAuthSetup))]
+    private async Task ShowAuthSetupAsync() =>
+        await _dialogManager.ShowDialogAsync(_viewModelManager.CreateAuthSetupViewModel());
+
+    private bool CanShowSettings() => !IsBusy;
+
+    [RelayCommand(CanExecute = nameof(CanShowSettings))]
+    private async Task ShowSettingsAsync() =>
+        await _dialogManager.ShowDialogAsync(_viewModelManager.CreateSettingsViewModel());
+
+    private async void EnqueueDownload(DownloadViewModel download, int position = 0)
     {
+        Downloads.Insert(position, download);
         var progress = _progressMuxer.CreateInput();
 
-        Task.Run(async () =>
+        try
         {
-            try
-            {
-                var downloader = new VideoDownloader(_settingsService.LastAuthCookies);
-                var tagInjector = new MediaTagInjector();
+            var downloader = new VideoDownloader(_settingsService.LastAuthCookies);
+            var tagInjector = new MediaTagInjector();
 
-                using var access = await _downloadSemaphore.AcquireAsync(
+            using var access = await _downloadSemaphore.AcquireAsync(download.CancellationToken);
+
+            download.Status = DownloadStatus.Started;
+
+            var downloadOption =
+                download.DownloadOption
+                ?? await downloader.GetBestDownloadOptionAsync(
+                    download.Video!.Id,
+                    download.DownloadPreference!,
                     download.CancellationToken
                 );
 
-                download.Status = DownloadStatus.Started;
+            await downloader.DownloadVideoAsync(
+                download.FilePath!,
+                download.Video!,
+                downloadOption,
+                _settingsService.ShouldInjectSubtitles,
+                download.Progress.Merge(progress),
+                download.CancellationToken
+            );
 
-                var downloadOption =
-                    download.DownloadOption
-                    ?? await downloader.GetBestDownloadOptionAsync(
-                        download.Video!.Id,
-                        download.DownloadPreference!,
+            if (_settingsService.ShouldInjectTags)
+            {
+                try
+                {
+                    await tagInjector.InjectTagsAsync(
+                        download.FilePath!,
+                        download.Video!,
                         download.CancellationToken
                     );
-
-                await downloader.DownloadVideoAsync(
-                    download.FilePath!,
-                    download.Video!,
-                    downloadOption,
-                    download.Progress.Merge(progress),
-                    download.CancellationToken
-                );
-
-                if (_settingsService.ShouldInjectTags)
-                {
-                    try
-                    {
-                        await tagInjector.InjectTagsAsync(
-                            download.FilePath!,
-                            download.Video!,
-                            download.CancellationToken
-                        );
-                    }
-                    catch
-                    {
-                        // Media tagging is not critical
-                    }
                 }
+                catch
+                {
+                    // Media tagging is not critical
+                }
+            }
 
                 if (_settingsService.ShouldDownloadThumbnail)
                 {
@@ -200,7 +211,8 @@ public class DashboardViewModel : PropertyChangedBase, IDisposable
             {
                 try
                 {
-                    // Delete the incompletely downloaded file
+                // Delete the incompletely downloaded file
+                if (!string.IsNullOrWhiteSpace(download.FilePath))
                     File.Delete(download.FilePath!);
                 }
                 catch
@@ -208,27 +220,23 @@ public class DashboardViewModel : PropertyChangedBase, IDisposable
                     // Ignore
                 }
 
-                download.Status =
-                    ex is OperationCanceledException
-                        ? DownloadStatus.Canceled
-                        : DownloadStatus.Failed;
+            download.Status =
+                ex is OperationCanceledException ? DownloadStatus.Canceled : DownloadStatus.Failed;
 
-                // Short error message for YouTube-related errors, full for others
-                download.ErrorMessage = ex is YoutubeExplodeException ? ex.Message : ex.ToString();
-            }
-            finally
-            {
-                progress.ReportCompletion();
-                download.Dispose();
-            }
-        });
-
-        Downloads.Insert(position, download);
+            // Short error message for YouTube-related errors, full for others
+            download.ErrorMessage = ex is YoutubeExplodeException ? ex.Message : ex.ToString();
+        }
+        finally
+        {
+            progress.ReportCompletion();
+            download.Dispose();
+        }
     }
 
-    public bool CanProcessQuery => !IsBusy && !string.IsNullOrWhiteSpace(Query);
+    private bool CanProcessQuery() => !IsBusy && !string.IsNullOrWhiteSpace(Query);
 
-    public async void ProcessQuery()
+    [RelayCommand(CanExecute = nameof(CanProcessQuery))]
+    private async Task ProcessQueryAsync()
     {
         if (string.IsNullOrWhiteSpace(Query))
             return;
@@ -258,7 +266,7 @@ public class DashboardViewModel : PropertyChangedBase, IDisposable
                 var downloadOptions = await downloader.GetDownloadOptionsAsync(video.Id);
 
                 var download = await _dialogManager.ShowDialogAsync(
-                    _viewModelFactory.CreateDownloadSingleSetupViewModel(video, downloadOptions)
+                    _viewModelManager.CreateDownloadSingleSetupViewModel(video, downloadOptions)
                 );
 
                 if (download is null)
@@ -270,7 +278,7 @@ public class DashboardViewModel : PropertyChangedBase, IDisposable
             else if (result.Videos.Count > 1)
             {
                 var downloads = await _dialogManager.ShowDialogAsync(
-                    _viewModelFactory.CreateDownloadMultipleSetupViewModel(
+                    _viewModelManager.CreateDownloadMultipleSetupViewModel(
                         result.Title,
                         result.Videos,
                         // Pre-select videos if they come from a single query and not from search
@@ -290,7 +298,7 @@ public class DashboardViewModel : PropertyChangedBase, IDisposable
             else
             {
                 await _dialogManager.ShowDialogAsync(
-                    _viewModelFactory.CreateMessageBoxViewModel(
+                    _viewModelManager.CreateMessageBoxViewModel(
                         "Nothing found",
                         "Couldn't find any videos based on the query or URL you provided"
                     )
@@ -300,7 +308,7 @@ public class DashboardViewModel : PropertyChangedBase, IDisposable
         catch (Exception ex)
         {
             await _dialogManager.ShowDialogAsync(
-                _viewModelFactory.CreateMessageBoxViewModel(
+                _viewModelManager.CreateMessageBoxViewModel(
                     "Error",
                     // Short error message for YouTube-related errors, full for others
                     ex is YoutubeExplodeException
@@ -316,14 +324,15 @@ public class DashboardViewModel : PropertyChangedBase, IDisposable
         }
     }
 
-    public void RemoveDownload(DownloadViewModel download)
+    private void RemoveDownload(DownloadViewModel download)
     {
         Downloads.Remove(download);
-        download.Cancel();
+        download.CancelCommand.Execute(null);
         download.Dispose();
     }
 
-    public void RemoveSuccessfulDownloads()
+    [RelayCommand]
+    private void RemoveSuccessfulDownloads()
     {
         foreach (var download in Downloads.ToArray())
         {
@@ -332,7 +341,8 @@ public class DashboardViewModel : PropertyChangedBase, IDisposable
         }
     }
 
-    public void RemoveInactiveDownloads()
+    [RelayCommand]
+    private void RemoveInactiveDownloads()
     {
         foreach (var download in Downloads.ToArray())
         {
@@ -346,18 +356,19 @@ public class DashboardViewModel : PropertyChangedBase, IDisposable
         }
     }
 
-    public void RestartDownload(DownloadViewModel download)
+    [RelayCommand]
+    private void RestartDownload(DownloadViewModel download)
     {
         var position = Math.Max(0, Downloads.IndexOf(download));
         RemoveDownload(download);
 
         var newDownload = download.DownloadOption is not null
-            ? _viewModelFactory.CreateDownloadViewModel(
+            ? _viewModelManager.CreateDownloadViewModel(
                 download.Video!,
                 download.DownloadOption,
                 download.FilePath!
             )
-            : _viewModelFactory.CreateDownloadViewModel(
+            : _viewModelManager.CreateDownloadViewModel(
                 download.Video!,
                 download.DownloadPreference!,
                 download.FilePath!
@@ -366,7 +377,8 @@ public class DashboardViewModel : PropertyChangedBase, IDisposable
         EnqueueDownload(newDownload, position);
     }
 
-    public void RestartFailedDownloads()
+    [RelayCommand]
+    private void RestartFailedDownloads()
     {
         foreach (var download in Downloads.ToArray())
         {
@@ -375,14 +387,23 @@ public class DashboardViewModel : PropertyChangedBase, IDisposable
         }
     }
 
-    public void CancelAllDownloads()
+    [RelayCommand]
+    private void CancelAllDownloads()
     {
         foreach (var download in Downloads)
-            download.Cancel();
+            download.CancelCommand.Execute(null);
     }
 
-    public void Dispose()
+    protected override void Dispose(bool disposing)
     {
-        _downloadSemaphore.Dispose();
+        if (disposing)
+        {
+            CancelAllDownloads();
+
+            _eventRoot.Dispose();
+            _downloadSemaphore.Dispose();
+        }
+
+        base.Dispose(disposing);
     }
 }
