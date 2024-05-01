@@ -153,12 +153,3 @@ jobs:
           gh release upload ${{ github.ref_name }}
           YoutubeDownloader.${{ matrix.rid }}.zip
           --repo ${{ github.event.repository.full_name }}
-          --title ${{ github.ref_name }}
-          --generate-notes
-          --verify-tag
-              "content": "[**${{ github.event.repository.name }}**](<${{ github.event.repository.html_url }}>) v${{ github.ref_name }} has been released!"
-            }
-          retry-count: 5
-              "content": "[**${{ github.event.repository.name }}**](<${{ github.event.repository.html_url }}>) v${{ github.ref_name }} has been released!"
-            }
-          retry-count: 5
