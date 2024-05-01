@@ -32,12 +32,14 @@ This application uses [**YoutubeExplode**](https://github.com/Tyrrrz/YoutubeExpl
 
 ## 功能
 
+- 跨平台用户界面 （暂未测试linux和mac系统）
 - 通过 URL 下载视频
 - 从播放列表或频道下载视频
 - 通过搜索查询下载视频
 - 可选择的视频质量和格式
 - 自动嵌入字幕
 - 自动注入媒体标签
+- 登录youtube账户访问私人视频
 
 新增功能：
 
@@ -48,27 +50,23 @@ This application uses [**YoutubeExplode**](https://github.com/Tyrrrz/YoutubeExpl
   - 百度翻译需要使用**AppId**和**Key**，微软翻译只需要使用**Key**。如果**AppId不为空**则使用百度翻译，反之使用微软翻译
   - 如果标题中的中文超过60%，则不会翻译视频标题、简介、字幕文件
 
-> **Important**:
-> To run **YoutubeDownloader**, you need to make sure that the **.NET 8.0 Runtime** is installed.
-> You can download it here:
+
+
+
+注：
+
+- 新增功能需要进入设置页面设置
+
+
+> **重要**:
+> 为了运行 **YoutubeDownloader**, 你需要确保你已经安装了 **.NET 8.0 Runtime** .
+> 可以在下面的列表中选择安装:
 >
 > - [.NET 8.0 Runtime for **macOS x64**](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-8.0.0-macos-x64-installer)
 > - [.NET 8.0 Runtime for **macOS arm64**](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-8.0.0-macos-arm64-installer)
-> - [.NET 8.0 Runtime for **Linux**](https://learn.microsoft.com/dotnet/core/install/linux) (find the correct download for your distro)
-> - On **Windows**, the runtime should be installed automatically when you run the application for the first time
+> - [.NET 8.0 Runtime for **Linux**](https://learn.microsoft.com/dotnet/core/install/linux) (需要为你所使用的发行版找到正确的安装)
+> - 在 **Windows**, 运行时会在第一次运行的时候自动安装
 
-## Features
-注：
-
-- Cross-platform graphical user interface
-- Download videos by URL
-- Download videos from playlists or channels
-- Download videos by search query
-- Selectable video quality and format
-- Automatically embed subtitles
-- Automatically inject media tags
-- Log in with a YouTube account to access private content
-- 新增功能需要进入设置页面设置
 
 ## 截图
 

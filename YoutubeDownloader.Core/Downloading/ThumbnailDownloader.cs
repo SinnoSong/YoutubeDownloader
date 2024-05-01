@@ -20,14 +20,12 @@ namespace YoutubeDownloader.Core.Downloading
             var tempPath = Path.ChangeExtension(path, "jpg");
             var thumbnailUrl =
                 video
-                    .Thumbnails
-                    .Where(
-                        t =>
-                            string.Equals(
-                                t.TryGetImageFormat(),
-                                "jpg",
-                                StringComparison.OrdinalIgnoreCase
-                            )
+                    .Thumbnails.Where(t =>
+                        string.Equals(
+                            t.TryGetImageFormat(),
+                            "jpg",
+                            StringComparison.OrdinalIgnoreCase
+                        )
                     )
                     .OrderByDescending(t => t.Resolution.Area)
                     .Select(t => t.Url)

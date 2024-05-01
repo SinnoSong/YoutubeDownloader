@@ -52,8 +52,8 @@ namespace YoutubeDownloader.Core.Downloading
                 request.Headers.Add("Ocp-Apim-Subscription-Region", AzureLocation);
 
                 // Send the request and get response.
-                HttpResponseMessage response = await Http.Client
-                    .SendAsync(request, cancellationToken)
+                HttpResponseMessage response = await Http
+                    .Client.SendAsync(request, cancellationToken)
                     .ConfigureAwait(false);
                 // Read response as a string.
                 string json = await response.Content.ReadAsStringAsync();
@@ -90,8 +90,8 @@ namespace YoutubeDownloader.Core.Downloading
                 request.Headers.Add("Ocp-Apim-Subscription-Key", key);
                 request.Headers.Add("Ocp-Apim-Subscription-Region", AzureLocation);
 
-                HttpResponseMessage response = await Http.Client
-                    .SendAsync(request)
+                HttpResponseMessage response = await Http
+                    .Client.SendAsync(request)
                     .ConfigureAwait(false);
                 string json = await response.Content.ReadAsStringAsync();
                 JsonDocument jsonDocument = JsonDocument.Parse(json);

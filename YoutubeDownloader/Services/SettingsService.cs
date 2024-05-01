@@ -31,19 +31,27 @@ public partial class SettingsService()
 
     [ObservableProperty]
     private bool _shouldInjectSubtitles = true;
-    public bool ShouldInjectTags { get; set; } = true;
-    public bool ShouldDownloadThumbnail { get; set; } = true;
-    public bool ShouldDownloadClosedCaptions { get; set; } = true;
-    public bool ShouldTranslateCCToChinese { get; set; } = true;
+
+    [ObservableProperty]
+    private string _translateKey = "";
+
+    [ObservableProperty]
+    private string _baiduAppId = "";
+
+    [ObservableProperty]
+    private bool _shouldDownloadThumbnail = true;
+
+    [ObservableProperty]
+    private bool _shouldDownloadClosedCaptions = true;
+
+    [ObservableProperty]
+    private bool _shouldTranslateCCToChinese = true;
 
     [ObservableProperty]
     private bool _shouldInjectTags = true;
 
     [ObservableProperty]
     private bool _shouldSkipExistingFiles;
-    public string FileNameTemplate { get; set; } = "$title";
-    public string TranslateKey { get; set; } = "";
-    public string BaiduAppId { get; set; } = "";
 
     [ObservableProperty]
     private string _fileNameTemplate = "$title";

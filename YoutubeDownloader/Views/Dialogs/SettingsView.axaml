@@ -4,161 +4,215 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:dialogs="clr-namespace:YoutubeDownloader.ViewModels.Dialogs"
     Width="380">
-    <Design.DataContext>
-        <dialogs:SettingsViewModel />
-    </Design.DataContext>
+	<Design.DataContext>
+		<dialogs:SettingsViewModel />
+	</Design.DataContext>
 
-    <Grid RowDefinitions="Auto,*,Auto">
-        <TextBlock
+	<Grid RowDefinitions="Auto,*,Auto">
+		<TextBlock
             Grid.Row="0"
             Margin="16"
             FontSize="19"
             FontWeight="Light"
             Text="Settings" />
 
-        <Border
+		<Border
             Grid.Row="1"
             Padding="0,8"
             BorderBrush="{DynamicResource MaterialDividerBrush}"
             BorderThickness="0,1">
-            <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-                <StackPanel Orientation="Vertical">
-                    <!--  Auto-updates  -->
-                    <DockPanel
+			<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+				<StackPanel Orientation="Vertical">
+					<!--  Auto-updates  -->
+					<DockPanel
                         Margin="16,8"
                         IsVisible="{OnPlatform False,
                                                Windows=True}"
                         LastChildFill="False">
-                        <ToolTip.Tip>
-                            <TextBlock>
-                                <Run Text="Perform automatic updates on every launch." />
-                                <LineBreak />
-                                <Run FontWeight="SemiBold" Text="Warning:" />
-                                <Run Text="it's recommended to leave this option enabled to ensure that the app" />
-                                <LineBreak />
-                                <Run Text=" " />
-                                <Run Text="is compatible with the latest version of YouTube." />
-                            </TextBlock>
-                        </ToolTip.Tip>
-                        <TextBlock DockPanel.Dock="Left" Text="Auto-update" />
-                        <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding IsAutoUpdateEnabled}" />
-                    </DockPanel>
+						<ToolTip.Tip>
+							<TextBlock>
+								<Run Text="Perform automatic updates on every launch." />
+								<LineBreak />
+								<Run FontWeight="SemiBold" Text="Warning:" />
+								<Run Text="it's recommended to leave this option enabled to ensure that the app" />
+								<LineBreak />
+								<Run Text=" " />
+								<Run Text="is compatible with the latest version of YouTube." />
+							</TextBlock>
+						</ToolTip.Tip>
+						<TextBlock DockPanel.Dock="Left" Text="Auto-update" />
+						<ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding IsAutoUpdateEnabled}" />
+					</DockPanel>
 
-                    <!--  Dark mode  -->
-                    <DockPanel
+					<!--  Dark mode  -->
+					<DockPanel
                         Margin="16,8"
                         LastChildFill="False"
                         ToolTip.Tip="Use darker colors in the UI">
-                        <TextBlock DockPanel.Dock="Left" Text="Dark mode" />
-                        <ToggleSwitch
+						<TextBlock DockPanel.Dock="Left" Text="Dark mode" />
+						<ToggleSwitch
                             x:Name="DarkModeToggleSwitch"
                             DockPanel.Dock="Right"
                             IsChecked="{Binding IsDarkModeEnabled}"
                             IsCheckedChanged="DarkModeToggleSwitch_OnIsCheckedChanged" />
-                    </DockPanel>
+					</DockPanel>
 
-                    <!--  Persist authentication  -->
-                    <DockPanel
+					<!--  Persist authentication  -->
+					<DockPanel
                         IsVisible="{OnPlatform False,
                                                Windows=True}"
                         LastChildFill="False"
                         ToolTip.Tip="Save authentication cookies to a file so that they can be persisted between sessions">
-                        <TextBlock
+						<TextBlock
                             Margin="16,8"
                             DockPanel.Dock="Left"
                             Text="Persist authentication" />
-                        <ToggleSwitch
+						<ToggleSwitch
                             Margin="16,8"
                             DockPanel.Dock="Right"
                             IsChecked="{Binding IsAuthPersisted}" />
-                    </DockPanel>
+					</DockPanel>
 
-                    <!--  Inject subtitles  -->
-                    <DockPanel
+					<!--  Inject subtitles  -->
+					<DockPanel
                         Margin="16,8"
                         LastChildFill="False"
                         ToolTip.Tip="Inject subtitles into downloaded files">
-                        <TextBlock DockPanel.Dock="Left" Text="Inject subtitles" />
-                        <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding ShouldInjectSubtitles}" />
-                    </DockPanel>
+						<TextBlock DockPanel.Dock="Left" Text="Inject subtitles" />
+						<ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding ShouldInjectSubtitles}" />
+					</DockPanel>
 
-                    <!--  Inject tags  -->
-                    <DockPanel
+					<!--  Inject tags  -->
+					<DockPanel
                         Margin="16,8"
                         LastChildFill="False"
                         ToolTip.Tip="Inject media tags into downloaded files">
-                        <TextBlock DockPanel.Dock="Left" Text="Inject media tags" />
-                        <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding ShouldInjectTags}" />
-                    </DockPanel>
+						<TextBlock DockPanel.Dock="Left" Text="Inject media tags" />
+						<ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding ShouldInjectTags}" />
+					</DockPanel>
 
-                    <!--  Skip existing files  -->
-                    <DockPanel
+					<!--  Download Thumbnail  -->
+					<DockPanel
+                        Margin="16,8"
+                        LastChildFill="False"
+                        ToolTip.Tip="Download thumbnail into the path of downloaded files">
+						<TextBlock DockPanel.Dock="Left" Text="Download Thumbnail" />
+						<ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding ShouldDownloadThumbnail}" />
+					</DockPanel>
+
+					<!--  Download ClosedCaption  -->
+					<DockPanel
+                        Margin="16,8"
+                        LastChildFill="False"
+                        ToolTip.Tip="Download subtitles into the path of downloaded files">
+						<TextBlock DockPanel.Dock="Left" Text="Download subtitles" />
+						<ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding ShouldDownloadClosedCaption}" />
+					</DockPanel>
+
+					<!--  Translate ClosedCaption to Chinese  -->
+					<DockPanel
+                        Margin="16,8"
+                        LastChildFill="False"
+                        ToolTip.Tip="Translate subtitles srt file to Chinese srt">
+						<TextBlock DockPanel.Dock="Left" Text="Translate ClosedCaption to Chinese" />
+						<ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding ShouldTranslateCCToChinese}" />
+					</DockPanel>
+
+					<!--  Skip existing files  -->
+					<DockPanel
                         Margin="16,8"
                         LastChildFill="False"
                         ToolTip.Tip="When downloading multiple videos, skip those that already have matching files in the output directory">
-                        <TextBlock DockPanel.Dock="Left" Text="Skip existing files" />
-                        <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding ShouldSkipExistingFiles}" />
-                    </DockPanel>
+						<TextBlock DockPanel.Dock="Left" Text="Skip existing files" />
+						<ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding ShouldSkipExistingFiles}" />
+					</DockPanel>
 
-                    <!--  File name template  -->
-                    <DockPanel Margin="16,8" LastChildFill="False">
-                        <ToolTip.Tip>
-                            <TextBlock>
-                                <Run Text="Template used for generating file names for downloaded videos." />
-                                <LineBreak />
-                                <LineBreak />
-                                <Run Text="Available tokens:" />
-                                <LineBreak />
-                                <Run Text=" " />
-                                <Run FontWeight="SemiBold" Text="$num" />
-                                <Run Text="— video's position in the list (if applicable)" />
-                                <LineBreak />
-                                <Run Text=" " />
-                                <Run FontWeight="SemiBold" Text="$id" />
-                                <Run Text="— video ID" />
-                                <LineBreak />
-                                <Run Text=" " />
-                                <Run FontWeight="SemiBold" Text="$title" />
-                                <Run Text="— video title" />
-                                <LineBreak />
-                                <Run Text=" " />
-                                <Run FontWeight="SemiBold" Text="$author" />
-                                <Run Text="— video author" />
-                            </TextBlock>
-                        </ToolTip.Tip>
-                        <TextBlock DockPanel.Dock="Left" Text="File name template" />
-                        <TextBox
+					<!--  File name template  -->
+					<DockPanel Margin="16,8" LastChildFill="False">
+						<ToolTip.Tip>
+							<TextBlock>
+								<Run Text="Template used for generating file names for downloaded videos." />
+								<LineBreak />
+								<LineBreak />
+								<Run Text="Available tokens:" />
+								<LineBreak />
+								<Run Text=" " />
+								<Run FontWeight="SemiBold" Text="$num" />
+								<Run Text="— video's position in the list (if applicable)" />
+								<LineBreak />
+								<Run Text=" " />
+								<Run FontWeight="SemiBold" Text="$id" />
+								<Run Text="— video ID" />
+								<LineBreak />
+								<Run Text=" " />
+								<Run FontWeight="SemiBold" Text="$title" />
+								<Run Text="— video title" />
+								<LineBreak />
+								<Run Text=" " />
+								<Run FontWeight="SemiBold" Text="$author" />
+								<Run Text="— video author" />
+							</TextBlock>
+						</ToolTip.Tip>
+						<TextBlock DockPanel.Dock="Left" Text="File name template" />
+						<TextBox
                             Width="150"
                             Height="20"
                             DockPanel.Dock="Right"
                             FontSize="13"
                             Text="{Binding FileNameTemplate}"
                             Theme="{DynamicResource CompactTextBox}" />
-                    </DockPanel>
+					</DockPanel>
 
-                    <!--  Parallel limit  -->
-                    <DockPanel
+					<!--  Translate key  -->
+					<DockPanel
+                        Margin="16,8" LastChildFill="False" ToolTip.Tip="Translate Key for Microsoft Translate API">
+						<TextBlock DockPanel.Dock="Left" Text="Azure Translate Key" />
+						<TextBox
+                            Width="150"
+                            Height="20"
+                            DockPanel.Dock="Right"
+                            FontSize="13"
+                            Text="{Binding TranslateKey}"
+                            Theme="{DynamicResource CompactTextBox}" />
+					</DockPanel>
+
+					<!--  Baidu Translate AppId  -->
+					<DockPanel
+                        Margin="16,8"
+                        LastChildFill="False" ToolTip.Tip="AppId for Baidu Translate API">
+						<TextBlock DockPanel.Dock="Left" Text="Baidu AppId" />
+						<TextBox
+                            Width="150"
+                            Height="20"
+                            DockPanel.Dock="Right"
+                            FontSize="13"
+                            Text="{Binding BaiduAppId}"
+                            Theme="{DynamicResource CompactTextBox}" />
+					</DockPanel>
+
+					<!--  Parallel limit  -->
+					<DockPanel
                         Margin="16,8"
                         LastChildFill="False"
                         ToolTip.Tip="How many downloads can be active at the same time">
-                        <TextBlock DockPanel.Dock="Left" Text="Parallel limit" />
-                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                            <TextBlock Margin="10,0" Text="{Binding ParallelLimit}" />
-                            <Slider
+						<TextBlock DockPanel.Dock="Left" Text="Parallel limit" />
+						<StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+							<TextBlock Margin="10,0" Text="{Binding ParallelLimit}" />
+							<Slider
                                 Width="150"
                                 IsSnapToTickEnabled="True"
                                 Maximum="10"
                                 Minimum="1"
                                 TickFrequency="1"
                                 Value="{Binding ParallelLimit}" />
-                        </StackPanel>
-                    </DockPanel>
-                </StackPanel>
-            </ScrollViewer>
-        </Border>
+						</StackPanel>
+					</DockPanel>
+				</StackPanel>
+			</ScrollViewer>
+		</Border>
 
-        <!--  Close button  -->
-        <Button
+		<!--  Close button  -->
+		<Button
             Grid.Row="2"
             Margin="16"
             HorizontalAlignment="Stretch"
@@ -167,5 +221,5 @@
             IsCancel="True"
             IsDefault="True"
             Theme="{DynamicResource MaterialOutlineButton}" />
-    </Grid>
+	</Grid>
 </UserControl>

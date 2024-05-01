@@ -34,14 +34,13 @@ public partial class DashboardViewModel : ViewModelBase
     [NotifyCanExecuteChangedFor(nameof(ShowAuthSetupCommand))]
     [NotifyCanExecuteChangedFor(nameof(ShowSettingsCommand))]
     private bool _isBusy;
+
     private readonly QueryResolver _queryResolver = new();
     private readonly VideoDownloader _videoDownloader = new();
     private readonly MediaTagInjector _mediaTagInjector = new();
     private readonly ThumbnailDownloader _thumbnailDownloader = new();
     private readonly ClosedCaptionsDownloader _closedCaptionsDownloader = new();
     private readonly Translater _translater = new();
-
-    public bool IsBusy { get; private set; }
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ProcessQueryCommand))]
@@ -139,86 +138,86 @@ public partial class DashboardViewModel : ViewModelBase
                 }
             }
 
-                if (_settingsService.ShouldDownloadThumbnail)
-                {
-                    await _thumbnailDownloader.DownloadThumbnailAsync(
-                        download.FilePath!,
-                        download.Video!,
-                        download.CancellationToken
-                    );
-                }
+            if (_settingsService.ShouldDownloadThumbnail)
+            {
+                await _thumbnailDownloader.DownloadThumbnailAsync(
+                    download.FilePath!,
+                    download.Video!,
+                    download.CancellationToken
+                );
+            }
 
-                if (_settingsService.ShouldDownloadClosedCaptions)
-                {
-                    var tuple = await _closedCaptionsDownloader.DownloadCCAsync(
-                        download.FilePath!,
-                        download.Video!,
-                        download.CancellationToken
-                    );
-                    if (
-                        !StringUtil.IsChineseTitle(download.Video!.Title)
-                        && !tuple.Item1
-                        && !string.IsNullOrWhiteSpace(_settingsService.TranslateKey)
-                        && !string.IsNullOrWhiteSpace(tuple.Item2)
-                    )
-                    {
-                        if (!string.IsNullOrWhiteSpace(_settingsService.BaiduAppId))
-                        {
-                            await _translater.BaiduTranslateSrtAsync(
-                                tuple.Item2,
-                                _settingsService.TranslateKey,
-                                _settingsService.BaiduAppId
-                            );
-                        }
-                        else
-                        {
-                            await _translater.AzureTranslateSrtAsync(
-                                tuple.Item2,
-                                _settingsService.TranslateKey
-                            );
-                        }
-                    }
-                }
+            if (_settingsService.ShouldDownloadClosedCaptions)
+            {
+                var tuple = await _closedCaptionsDownloader.DownloadCCAsync(
+                    download.FilePath!,
+                    download.Video!,
+                    download.CancellationToken
+                );
                 if (
                     !StringUtil.IsChineseTitle(download.Video!.Title)
+                    && !tuple.Item1
                     && !string.IsNullOrWhiteSpace(_settingsService.TranslateKey)
+                    && !string.IsNullOrWhiteSpace(tuple.Item2)
                 )
                 {
                     if (!string.IsNullOrWhiteSpace(_settingsService.BaiduAppId))
                     {
-                        await _translater.BaiduTranslateContentAsync(
-                            download.Video!,
-                            download.FilePath!,
+                        await _translater.BaiduTranslateSrtAsync(
+                            tuple.Item2,
                             _settingsService.TranslateKey,
-                            _settingsService.BaiduAppId,
-                            download.CancellationToken
+                            _settingsService.BaiduAppId
                         );
                     }
                     else
                     {
-                        await _translater.AzureTranslateAsync(
-                            download.Video!,
-                            download.FilePath!,
-                            _settingsService.TranslateKey,
-                            download.CancellationToken
+                        await _translater.AzureTranslateSrtAsync(
+                            tuple.Item2,
+                            _settingsService.TranslateKey
                         );
                     }
                 }
-
-                download.Status = DownloadStatus.Completed;
             }
-            catch (Exception ex)
+            if (
+                !StringUtil.IsChineseTitle(download.Video!.Title)
+                && !string.IsNullOrWhiteSpace(_settingsService.TranslateKey)
+            )
             {
-                try
+                if (!string.IsNullOrWhiteSpace(_settingsService.BaiduAppId))
                 {
+                    await _translater.BaiduTranslateContentAsync(
+                        download.Video!,
+                        download.FilePath!,
+                        _settingsService.TranslateKey,
+                        _settingsService.BaiduAppId,
+                        download.CancellationToken
+                    );
+                }
+                else
+                {
+                    await _translater.AzureTranslateAsync(
+                        download.Video!,
+                        download.FilePath!,
+                        _settingsService.TranslateKey,
+                        download.CancellationToken
+                    );
+                }
+            }
+
+            download.Status = DownloadStatus.Completed;
+        }
+        catch (Exception ex)
+        {
+            try
+            {
                 // Delete the incompletely downloaded file
                 if (!string.IsNullOrWhiteSpace(download.FilePath))
                     File.Delete(download.FilePath!);
-                }
-                catch
-                {
-                    // Ignore
-                }
+            }
+            catch
+            {
+                // Ignore
+            }
 
             download.Status =
                 ex is OperationCanceledException ? DownloadStatus.Canceled : DownloadStatus.Failed;
