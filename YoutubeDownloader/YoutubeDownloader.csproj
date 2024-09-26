@@ -2,8 +2,14 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationIcon>..\favicon.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- Trimmed builds break support for Windows 10 for some reason -->
+    <!-- https://github.com/Tyrrrz/YoutubeDownloader/issues/496 -->
+    <PublishTrimmed>false</PublishTrimmed>
+    <CopyOutputSymbolsToPublishDirectory>false</CopyOutputSymbolsToPublishDirectory>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,23 +17,27 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AsyncImageLoader.Avalonia" Version="3.2.1" />
-    <PackageReference Include="Avalonia" Version="11.0.10" />
-    <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.0.10" />
-    <PackageReference Include="Avalonia.Desktop" Version="11.0.10" />
-    <PackageReference Include="Avalonia.Diagnostics" Version="11.0.10" Condition="'$(Configuration)' == 'Debug'" />
-    <PackageReference Include="Cogwheel" Version="2.0.4" />
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
-    <PackageReference Include="CSharpier.MsBuild" Version="0.28.2" PrivateAssets="all" />
+    <None Include="ffmpeg.exe" CopyToOutputDirectory="PreserveNewest" Condition="Exists('ffmpeg.exe')" />
+    <None Include="ffmpeg" CopyToOutputDirectory="PreserveNewest" Condition="Exists('ffmpeg')" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AsyncImageLoader.Avalonia" Version="3.3.0" />
+    <PackageReference Include="Avalonia" Version="11.1.3" />
+    <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.1.3" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.1.3" />
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.1.3" Condition="'$(Configuration)' == 'Debug'" />
+    <PackageReference Include="Cogwheel" Version="2.1.0" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.0" />
+    <PackageReference Include="CSharpier.MsBuild" Version="0.29.1" PrivateAssets="all" />
     <PackageReference Include="Deorcify" Version="1.0.2" PrivateAssets="all" />
-    <PackageReference Include="DialogHost.Avalonia" Version="0.7.7" />
-    <PackageReference Include="DotnetRuntimeBootstrapper" Version="2.5.4" PrivateAssets="all" />
+    <PackageReference Include="DialogHost.Avalonia" Version="0.8.1" />
     <PackageReference Include="Gress" Version="2.1.1" />
-    <PackageReference Include="Material.Avalonia" Version="3.5.0" />
-    <PackageReference Include="Material.Avalonia.DataGrid" Version="3.5.0" />
-    <PackageReference Include="Material.Icons.Avalonia" Version="2.1.9" />
+    <PackageReference Include="Material.Avalonia" Version="3.7.2" />
+    <PackageReference Include="Material.Avalonia.DataGrid" Version="3.7.2" />
+    <PackageReference Include="Material.Icons.Avalonia" Version="2.1.10" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
-    <PackageReference Include="Onova" Version="2.6.11" />
+    <PackageReference Include="Onova" Version="2.6.12" />
     <PackageReference Include="WebView.Avalonia" Version="11.0.0.1" />
     <PackageReference Include="WebView.Avalonia.Desktop" Version="11.0.0.1" />
   </ItemGroup>
@@ -36,29 +46,18 @@
     <ProjectReference Include="..\YoutubeDownloader.Core\YoutubeDownloader.Core.csproj" />
   </ItemGroup>
 
-  <!-- Download FFmpeg and copy it to the output directory-->
-  <PropertyGroup>
-    <FFmpegPlatform>$(RuntimeIdentifier)</FFmpegPlatform>
-    <FFmpegPlatform Condition="'$(FFmpegPlatform)' == '' AND $([MSBuild]::IsOsPlatform('Windows')) AND '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'Arm64'">win-arm64</FFmpegPlatform>
-    <FFmpegPlatform Condition="'$(FFmpegPlatform)' == '' AND $([MSBuild]::IsOsPlatform('Windows')) AND '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'X86'">win-x86</FFmpegPlatform>
-    <FFmpegPlatform Condition="'$(FFmpegPlatform)' == '' AND $([MSBuild]::IsOsPlatform('Windows')) AND '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'X64'">win-x64</FFmpegPlatform>
-    <FFmpegPlatform Condition="'$(FFmpegPlatform)' == '' AND $([MSBuild]::IsOsPlatform('Linux')) AND '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'Arm64'">linux-arm64</FFmpegPlatform>
-    <FFmpegPlatform Condition="'$(FFmpegPlatform)' == '' AND $([MSBuild]::IsOsPlatform('Linux')) AND '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'X86'">linux-x86</FFmpegPlatform>
-    <FFmpegPlatform Condition="'$(FFmpegPlatform)' == '' AND $([MSBuild]::IsOsPlatform('Linux')) AND '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'X64'">linux-x64</FFmpegPlatform>
-    <FFmpegPlatform Condition="'$(FFmpegPlatform)' == '' AND $([MSBuild]::IsOsPlatform('OSX')) AND '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'Arm64'">osx-arm64</FFmpegPlatform>
-    <FFmpegPlatform Condition="'$(FFmpegPlatform)' == '' AND $([MSBuild]::IsOsPlatform('OSX')) AND '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'X64'">osx-x64</FFmpegPlatform>
-    <FFmpegFileName Condition="$(FFmpegPlatform.StartsWith('win'))">ffmpeg.exe</FFmpegFileName>
-    <FFmpegFileName Condition="'$(FFmpegFileName)' == ''">ffmpeg</FFmpegFileName>
-  </PropertyGroup>
-  
-  <Target Name="Download FFmpeg before build" BeforeTargets="PreBuildEvent">
-    <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(ProjectDir)/DownloadFFmpeg.ps1&quot; -Platform $(FFmpegPlatform) -OutputPath &quot;$(ProjectDir)/$(FFmpegFileName)&quot;" LogStandardErrorAsError="true" />
-    <Copy SourceFiles="$(ProjectDir)/$(FFmpegFileName)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
-  </Target>
-
-  <Target Name="Download FFmpeg before publish" BeforeTargets="PrepareForPublish">
-    <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(ProjectDir)/DownloadFFmpeg.ps1&quot; -Platform $(FFmpegPlatform) -OutputPath &quot;$(ProjectDir)/$(FFmpegFileName)&quot;" LogStandardErrorAsError="true" />
-    <Copy SourceFiles="$(ProjectDir)/$(FFmpegFileName)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
-  </Target>
+  <!-- Avalonia.WebView is completely incompatible with trimming -->
+  <ItemGroup>
+    <TrimmerRootAssembly Include="Avalonia.WebView" />
+    <TrimmerRootAssembly Include="Avalonia.WebView.Desktop" />
+    <TrimmerRootAssembly Include="Avalonia.WebView.Linux" />
+    <TrimmerRootAssembly Include="Avalonia.WebView.MacCatalyst" />
+    <TrimmerRootAssembly Include="Avalonia.WebView.Windows" />
+    <TrimmerRootAssembly Include="AvaloniaWebView.Shared" />
+    <TrimmerRootAssembly Include="Linux.WebView.Core" />
+    <TrimmerRootAssembly Include="Microsoft.Web.WebView2.Core" />
+    <TrimmerRootAssembly Include="WebView.Avalonia" />
+    <TrimmerRootAssembly Include="WebView.Core" />
+  </ItemGroup>
 
 </Project>

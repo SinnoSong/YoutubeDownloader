@@ -4,33 +4,57 @@ using System.IO;
 using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Avalonia;
-using Avalonia.Platform;
 using Cogwheel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using YoutubeDownloader.Core.Downloading;
+using YoutubeDownloader.Framework;
 using Container = YoutubeExplode.Videos.Streams.Container;
 
 namespace YoutubeDownloader.Services;
 
+// Can't use [ObservableProperty] here because System.Text.Json's source generator doesn't see
+// the generated properties.
 [INotifyPropertyChanged]
 public partial class SettingsService()
-    : SettingsBase(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Settings.dat"))
+    : SettingsBase(
+        Path.Combine(AppContext.BaseDirectory, "Settings.dat"),
+        SerializerContext.Default
+    )
 {
-    [ObservableProperty]
     private bool _isUkraineSupportMessageEnabled = true;
+    public bool IsUkraineSupportMessageEnabled
+    {
+        get => _isUkraineSupportMessageEnabled;
+        set => SetProperty(ref _isUkraineSupportMessageEnabled, value);
+    }
 
-    [ObservableProperty]
+    private ThemeVariant _theme;
+    public ThemeVariant Theme
+    {
+        get => _theme;
+        set => SetProperty(ref _theme, value);
+    }
+
     private bool _isAutoUpdateEnabled = true;
+    public bool IsAutoUpdateEnabled
+    {
+        get => _isAutoUpdateEnabled;
+        set => SetProperty(ref _isAutoUpdateEnabled, value);
+    }
 
-    [ObservableProperty]
-    private bool _isDarkModeEnabled;
-
-    [ObservableProperty]
     private bool _isAuthPersisted = true;
+    public bool IsAuthPersisted
+    {
+        get => _isAuthPersisted;
+        set => SetProperty(ref _isAuthPersisted, value);
+    }
 
-    [ObservableProperty]
     private bool _shouldInjectSubtitles = true;
+    public bool ShouldInjectSubtitles
+    {
+        get => _shouldInjectSubtitles;
+        set => SetProperty(ref _shouldInjectSubtitles, value);
+    }
 
     [ObservableProperty]
     private string _translateKey = "";
@@ -49,35 +73,54 @@ public partial class SettingsService()
 
     [ObservableProperty]
     private bool _shouldInjectTags = true;
+    public bool ShouldInjectTags
+    {
+        get => _shouldInjectTags;
+        set => SetProperty(ref _shouldInjectTags, value);
+    }
 
-    [ObservableProperty]
     private bool _shouldSkipExistingFiles;
+    public bool ShouldSkipExistingFiles
+    {
+        get => _shouldSkipExistingFiles;
+        set => SetProperty(ref _shouldSkipExistingFiles, value);
+    }
 
-    [ObservableProperty]
     private string _fileNameTemplate = "$title";
+    public string FileNameTemplate
+    {
+        get => _fileNameTemplate;
+        set => SetProperty(ref _fileNameTemplate, value);
+    }
 
-    [ObservableProperty]
     private int _parallelLimit = 2;
+    public int ParallelLimit
+    {
+        get => _parallelLimit;
+        set => SetProperty(ref _parallelLimit, value);
+    }
 
-    [ObservableProperty]
     private IReadOnlyList<Cookie>? _lastAuthCookies;
+    public IReadOnlyList<Cookie>? LastAuthCookies
+    {
+        get => _lastAuthCookies;
+        set => SetProperty(ref _lastAuthCookies, value);
+    }
 
-    [ObservableProperty]
-    [property: JsonConverter(typeof(ContainerJsonConverter))]
     private Container _lastContainer = Container.Mp4;
 
-    [ObservableProperty]
-    private VideoQualityPreference _lastVideoQualityPreference = VideoQualityPreference.Highest;
-
-    public override void Reset()
+    [JsonConverter(typeof(ContainerJsonConverter))]
+    public Container LastContainer
     {
-        base.Reset();
+        get => _lastContainer;
+        set => SetProperty(ref _lastContainer, value);
+    }
 
-        // Reset the dark mode setting separately because its default value is evaluated dynamically
-        // and cannot be set by the field initializer.
-        IsDarkModeEnabled =
-            Application.Current?.PlatformSettings?.GetColorValues().ThemeVariant
-            == PlatformThemeVariant.Dark;
+    private VideoQualityPreference _lastVideoQualityPreference = VideoQualityPreference.Highest;
+    public VideoQualityPreference LastVideoQualityPreference
+    {
+        get => _lastVideoQualityPreference;
+        set => SetProperty(ref _lastVideoQualityPreference, value);
     }
 
     public override void Save()
@@ -140,4 +183,10 @@ public partial class SettingsService
             writer.WriteEndObject();
         }
     }
+}
+
+public partial class SettingsService
+{
+    [JsonSerializable(typeof(SettingsService))]
+    private partial class SerializerContext : JsonSerializerContext;
 }

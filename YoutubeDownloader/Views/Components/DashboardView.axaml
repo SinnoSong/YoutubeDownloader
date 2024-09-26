@@ -8,11 +8,8 @@
     xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
     xmlns:materialStyles="clr-namespace:Material.Styles.Controls;assembly=Material.Styles"
     x:Name="UserControl"
+    x:DataType="components:DashboardViewModel"
     Loaded="UserControl_OnLoaded">
-    <Design.DataContext>
-        <components:DashboardViewModel />
-    </Design.DataContext>
-
     <DockPanel>
         <!--  Header  -->
         <StackPanel
@@ -30,6 +27,7 @@
                         ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                         Text="{Binding Query}"
                         Theme="{DynamicResource SoloTextBox}"
+                        ToolTip.Tip="Any valid YouTube URL or ID is accepted. Prepend a question mark (?) to perform search by text."
                         Watermark="URL or search query">
                         <TextBox.InnerLeftContent>
                             <materialIcons:MaterialIcon
@@ -208,6 +206,22 @@
                                         Classes.started="{Binding Status, Converter={x:Static converters:EqualityConverter.Equality}, ConverterParameter={x:Static components:DownloadStatus.Started}}"
                                         PointerReleased="StatusTextBlock_OnPointerReleased"
                                         TextTrimming="CharacterEllipsis">
+                                        <TextBlock.Resources>
+                                            <ResourceDictionary>
+                                                <ResourceDictionary.ThemeDictionaries>
+                                                    <ResourceDictionary x:Key="Default">
+                                                        <SolidColorBrush x:Key="SuccessBrush" Color="DarkGreen" />
+                                                        <SolidColorBrush x:Key="CanceledBrush" Color="DarkOrange" />
+                                                        <SolidColorBrush x:Key="FailedBrush" Color="DarkRed" />
+                                                    </ResourceDictionary>
+                                                    <ResourceDictionary x:Key="Dark">
+                                                        <SolidColorBrush x:Key="SuccessBrush" Color="LightGreen" />
+                                                        <SolidColorBrush x:Key="CanceledBrush" Color="Orange" />
+                                                        <SolidColorBrush x:Key="FailedBrush" Color="OrangeRed" />
+                                                    </ResourceDictionary>
+                                                </ResourceDictionary.ThemeDictionaries>
+                                            </ResourceDictionary>
+                                        </TextBlock.Resources>
                                         <TextBlock.Styles>
                                             <Style Selector="TextBlock">
                                                 <Style Selector="^.enqueued">
@@ -299,7 +313,7 @@
                                     <Button
                                         Padding="4"
                                         VerticalAlignment="Center"
-                                        Command="{Binding $parent[UserControl].DataContext.RestartDownloadCommand}"
+                                        Command="{Binding $parent[UserControl].((components:DashboardViewModel)DataContext).RestartDownloadCommand}"
                                         CommandParameter="{Binding}"
                                         IsVisible="{Binding IsCanceledOrFailed}"
                                         Theme="{DynamicResource MaterialFlatButton}"

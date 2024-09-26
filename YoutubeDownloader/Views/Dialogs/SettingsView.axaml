@@ -3,13 +3,10 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:dialogs="clr-namespace:YoutubeDownloader.ViewModels.Dialogs"
-    Width="380">
-	<Design.DataContext>
-		<dialogs:SettingsViewModel />
-	</Design.DataContext>
-
-	<Grid RowDefinitions="Auto,*,Auto">
-		<TextBlock
+    Width="380"
+    x:DataType="dialogs:SettingsViewModel">
+    <Grid RowDefinitions="Auto,*,Auto">
+        <TextBlock
             Grid.Row="0"
             Margin="16"
             FontSize="19"
@@ -21,10 +18,23 @@
             Padding="0,8"
             BorderBrush="{DynamicResource MaterialDividerBrush}"
             BorderThickness="0,1">
-			<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-				<StackPanel Orientation="Vertical">
-					<!--  Auto-updates  -->
-					<DockPanel
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                <StackPanel Orientation="Vertical">
+                    <!--  Theme  -->
+                    <DockPanel
+                        Margin="16,8"
+                        LastChildFill="False"
+                        ToolTip.Tip="Preferred user interface theme">
+                        <TextBlock DockPanel.Dock="Left" Text="Theme" />
+                        <ComboBox
+                            Width="150"
+                            DockPanel.Dock="Right"
+                            ItemsSource="{Binding AvailableThemes}"
+                            SelectedItem="{Binding Theme}" />
+                    </DockPanel>
+
+                    <!--  Auto-updates  -->
+                    <DockPanel
                         Margin="16,8"
                         IsVisible="{OnPlatform False,
                                                Windows=True}"
@@ -44,21 +54,8 @@
 						<ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding IsAutoUpdateEnabled}" />
 					</DockPanel>
 
-					<!--  Dark mode  -->
-					<DockPanel
-                        Margin="16,8"
-                        LastChildFill="False"
-                        ToolTip.Tip="Use darker colors in the UI">
-						<TextBlock DockPanel.Dock="Left" Text="Dark mode" />
-						<ToggleSwitch
-                            x:Name="DarkModeToggleSwitch"
-                            DockPanel.Dock="Right"
-                            IsChecked="{Binding IsDarkModeEnabled}"
-                            IsCheckedChanged="DarkModeToggleSwitch_OnIsCheckedChanged" />
-					</DockPanel>
-
-					<!--  Persist authentication  -->
-					<DockPanel
+                    <!--  Persist authentication  -->
+                    <DockPanel
                         IsVisible="{OnPlatform False,
                                                Windows=True}"
                         LastChildFill="False"
