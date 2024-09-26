@@ -12,7 +12,7 @@ using Container = YoutubeExplode.Videos.Streams.Container;
 
 namespace YoutubeDownloader.Services;
 
-// Can't use [ObservableProperty] here because System.Text.Json's source generator doesn't see
+// Can't use  here because System.Text.Json's source generator doesn't see
 // the generated properties.
 [INotifyPropertyChanged]
 public partial class SettingsService()
@@ -21,7 +21,7 @@ public partial class SettingsService()
         SerializerContext.Default
     )
 {
-    private bool _isUkraineSupportMessageEnabled = true;
+    private bool _isUkraineSupportMessageEnabled = false;
     public bool IsUkraineSupportMessageEnabled
     {
         get => _isUkraineSupportMessageEnabled;
@@ -35,7 +35,7 @@ public partial class SettingsService()
         set => SetProperty(ref _theme, value);
     }
 
-    private bool _isAutoUpdateEnabled = true;
+    private bool _isAutoUpdateEnabled = false;
     public bool IsAutoUpdateEnabled
     {
         get => _isAutoUpdateEnabled;
@@ -56,22 +56,44 @@ public partial class SettingsService()
         set => SetProperty(ref _shouldInjectSubtitles, value);
     }
 
-    [ObservableProperty]
+    #region 新增配置
     private string _translateKey = "";
+    public string TranslateKey
+    {
+        get => _translateKey;
+        set => SetProperty(ref _translateKey, value);
+    }
 
-    [ObservableProperty]
     private string _baiduAppId = "";
+    public string BaiduAppId
+    {
+        get => _baiduAppId;
+        set => SetProperty(ref _baiduAppId, value);
+    }
 
-    [ObservableProperty]
     private bool _shouldDownloadThumbnail = true;
+    public bool ShouldDownloadThumbnail
+    {
+        get => _shouldDownloadThumbnail;
+        set => SetProperty(ref _shouldDownloadThumbnail, value);
+    }
 
-    [ObservableProperty]
     private bool _shouldDownloadClosedCaptions = true;
+    public bool ShouldDownloadClosedCaptions
+    {
+        get => _shouldDownloadClosedCaptions;
+        set => SetProperty(ref _shouldDownloadClosedCaptions, value);
+    }
 
-    [ObservableProperty]
     private bool _shouldTranslateCCToChinese = true;
+    public bool ShouldTranslateCCToChinese
+    {
+        get => _shouldTranslateCCToChinese;
+        set => SetProperty(ref _shouldTranslateCCToChinese, value);
+    }
+    #endregion
 
-    [ObservableProperty]
+
     private bool _shouldInjectTags = true;
     public bool ShouldInjectTags
     {
