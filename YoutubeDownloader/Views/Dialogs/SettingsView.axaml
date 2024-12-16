@@ -70,23 +70,32 @@
                             IsChecked="{Binding IsAuthPersisted}" />
 					</DockPanel>
 
-					<!--  Inject subtitles  -->
-					<DockPanel
+                    <!--  Inject language-specific audio streams  -->
+                    <DockPanel
                         Margin="16,8"
                         LastChildFill="False"
-                        ToolTip.Tip="Inject subtitles into downloaded files">
-						<TextBlock DockPanel.Dock="Left" Text="Inject subtitles" />
-						<ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding ShouldInjectSubtitles}" />
-					</DockPanel>
+                        ToolTip.Tip="Inject audio tracks in alternative languages (if available) into downloaded files">
+                        <TextBlock DockPanel.Dock="Left" Text="Inject alternative languages" />
+                        <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding ShouldInjectLanguageSpecificAudioStreams}" />
+                    </DockPanel>
+
+                    <!--  Inject subtitles  -->
+                    <DockPanel
+                        Margin="16,8"
+                        LastChildFill="False"
+                        ToolTip.Tip="Inject subtitles (if available) into downloaded files">
+                        <TextBlock DockPanel.Dock="Left" Text="Inject subtitles" />
+                        <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding ShouldInjectSubtitles}" />
+                    </DockPanel>
 
 					<!--  Inject tags  -->
 					<DockPanel
                         Margin="16,8"
                         LastChildFill="False"
-                        ToolTip.Tip="Inject media tags into downloaded files">
-						<TextBlock DockPanel.Dock="Left" Text="Inject media tags" />
-						<ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding ShouldInjectTags}" />
-					</DockPanel>
+                        ToolTip.Tip="Inject media tags (if available) into downloaded files">
+                        <TextBlock DockPanel.Dock="Left" Text="Inject media tags" />
+                        <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding ShouldInjectTags}" />
+                    </DockPanel>
 
 					<!--  Download Thumbnail  -->
 					<DockPanel

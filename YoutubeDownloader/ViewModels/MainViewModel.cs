@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Avalonia;
 using CommunityToolkit.Mvvm.Input;
-using YoutubeDownloader.Core;
 using YoutubeDownloader.Core.Downloading;
 using YoutubeDownloader.Framework;
 using YoutubeDownloader.Services;
@@ -60,8 +59,8 @@ public partial class MainViewModel(
 
         var dialog = viewModelManager.CreateMessageBoxViewModel(
             "Unstable build warning",
-            """
-            You're using a development build of the application. These builds are not thoroughly tested and may contain bugs.
+            $"""
+            You're using a development build of {Program.Name}. These builds are not thoroughly tested and may contain bugs.
 
             Auto-updates are disabled for development builds. If you want to switch to a stable release, please download it manually.
             """,
