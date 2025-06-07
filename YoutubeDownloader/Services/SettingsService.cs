@@ -12,49 +12,27 @@ using Container = YoutubeExplode.Videos.Streams.Container;
 
 namespace YoutubeDownloader.Services;
 
-// Can't use  here because System.Text.Json's source generator doesn't see
-// the generated properties.
-[INotifyPropertyChanged]
+[ObservableObject]
 public partial class SettingsService()
     : SettingsBase(
         Path.Combine(AppContext.BaseDirectory, "Settings.dat"),
         SerializerContext.Default
     )
 {
-    private bool _isUkraineSupportMessageEnabled = false;
-    public bool IsUkraineSupportMessageEnabled
-    {
-        get => _isUkraineSupportMessageEnabled;
-        set => SetProperty(ref _isUkraineSupportMessageEnabled, value);
-    }
+    [ObservableProperty]
+    public partial bool IsUkraineSupportMessageEnabled { get; set; } = true;
 
-    private ThemeVariant _theme;
-    public ThemeVariant Theme
-    {
-        get => _theme;
-        set => SetProperty(ref _theme, value);
-    }
+    [ObservableProperty]
+    public partial ThemeVariant Theme { get; set; }
 
-    private bool _isAutoUpdateEnabled = false;
-    public bool IsAutoUpdateEnabled
-    {
-        get => _isAutoUpdateEnabled;
-        set => SetProperty(ref _isAutoUpdateEnabled, value);
-    }
+    [ObservableProperty]
+    public partial bool IsAutoUpdateEnabled { get; set; } = true;
 
-    private bool _isAuthPersisted = true;
-    public bool IsAuthPersisted
-    {
-        get => _isAuthPersisted;
-        set => SetProperty(ref _isAuthPersisted, value);
-    }
+    [ObservableProperty]
+    public partial bool IsAuthPersisted { get; set; } = true;
 
-    private bool _shouldInjectLanguageSpecificAudioStreams = true;
-    public bool ShouldInjectLanguageSpecificAudioStreams
-    {
-        get => _shouldInjectLanguageSpecificAudioStreams;
-        set => SetProperty(ref _shouldInjectLanguageSpecificAudioStreams, value);
-    }
+    [ObservableProperty]
+    public partial bool ShouldInjectLanguageSpecificAudioStreams { get; set; } = true;
 
     private bool _shouldInjectSubtitles = true;
     public bool ShouldInjectSubtitles
@@ -91,6 +69,8 @@ public partial class SettingsService()
         get => _shouldDownloadClosedCaptions;
         set => SetProperty(ref _shouldDownloadClosedCaptions, value);
     }
+    [ObservableProperty]
+    public partial bool ShouldInjectSubtitles { get; set; } = true;
 
     private bool _shouldTranslateCCToChinese = true;
     public bool ShouldTranslateCCToChinese
@@ -114,43 +94,28 @@ public partial class SettingsService()
         get => _shouldSkipExistingFiles;
         set => SetProperty(ref _shouldSkipExistingFiles, value);
     }
+    [ObservableProperty]
+    public partial bool ShouldInjectTags { get; set; } = true;
 
-    private string _fileNameTemplate = "$title";
-    public string FileNameTemplate
-    {
-        get => _fileNameTemplate;
-        set => SetProperty(ref _fileNameTemplate, value);
-    }
+    [ObservableProperty]
+    public partial bool ShouldSkipExistingFiles { get; set; }
 
-    private int _parallelLimit = 2;
-    public int ParallelLimit
-    {
-        get => _parallelLimit;
-        set => SetProperty(ref _parallelLimit, value);
-    }
+    [ObservableProperty]
+    public partial string FileNameTemplate { get; set; } = "$title";
 
-    private IReadOnlyList<Cookie>? _lastAuthCookies;
-    public IReadOnlyList<Cookie>? LastAuthCookies
-    {
-        get => _lastAuthCookies;
-        set => SetProperty(ref _lastAuthCookies, value);
-    }
+    [ObservableProperty]
+    public partial int ParallelLimit { get; set; } = 2;
 
-    private Container _lastContainer = Container.Mp4;
+    [ObservableProperty]
+    public partial IReadOnlyList<Cookie>? LastAuthCookies { get; set; }
 
+    [ObservableProperty]
     [JsonConverter(typeof(ContainerJsonConverter))]
-    public Container LastContainer
-    {
-        get => _lastContainer;
-        set => SetProperty(ref _lastContainer, value);
-    }
+    public partial Container LastContainer { get; set; } = Container.Mp4;
 
-    private VideoQualityPreference _lastVideoQualityPreference = VideoQualityPreference.Highest;
-    public VideoQualityPreference LastVideoQualityPreference
-    {
-        get => _lastVideoQualityPreference;
-        set => SetProperty(ref _lastVideoQualityPreference, value);
-    }
+    [ObservableProperty]
+    public partial VideoQualityPreference LastVideoQualityPreference { get; set; } =
+        VideoQualityPreference.Highest;
 
     public override void Save()
     {

@@ -25,24 +25,26 @@ public partial class DownloadMultipleSetupViewModel(
 ) : DialogViewModelBase<IReadOnlyList<DownloadViewModel>>
 {
     [ObservableProperty]
-    private string? _title;
+    public partial string? Title { get; set; }
 
     [ObservableProperty]
-    private IReadOnlyList<IVideo>? _availableVideos;
+    public partial IReadOnlyList<IVideo>? AvailableVideos { get; set; }
 
     [ObservableProperty]
-    private Container _selectedContainer = Container.Mp4;
+    public partial Container SelectedContainer { get; set; } = Container.Mp4;
 
     [ObservableProperty]
-    private VideoQualityPreference _selectedVideoQualityPreference = VideoQualityPreference.Highest;
+    public partial VideoQualityPreference SelectedVideoQualityPreference { get; set; } =
+        VideoQualityPreference.Highest;
 
     public ObservableCollection<IVideo> SelectedVideos { get; } = [];
 
     public IReadOnlyList<Container> AvailableContainers { get; } =
-        [Container.Mp4, Container.WebM, Container.Mp3, new Container("ogg")];
+        [Container.Mp4, Container.WebM, Container.Mp3, new("ogg")];
 
     public IReadOnlyList<VideoQualityPreference> AvailableVideoQualityPreferences { get; } =
-        Enum.GetValues<VideoQualityPreference>().Cast<VideoQualityPreference>().Reverse().ToArray();
+        // Without .AsEnumerable(), the below line throws a compile-time error starting with .NET SDK v9.0.200
+        Enum.GetValues<VideoQualityPreference>().AsEnumerable().Reverse().ToArray();
 
     [RelayCommand]
     private void Initialize()
