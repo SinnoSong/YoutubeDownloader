@@ -1,7 +1,5 @@
 ﻿# YoutubeDownloader
 
-[英文](Readme_EN.md)
-
 [![Build](https://img.shields.io/github/actions/workflow/status/SinnoSong/YoutubeDownloader/main.yml?branch=master)](https://github.com/SinnoSong/YoutubeDownloader/actions)
 [![Release](https://img.shields.io/github/release/SinnoSong/YoutubeDownloader.svg)](https://github.com/SinnoSong/YoutubeDownloader/releases)
 [![Downloads](https://img.shields.io/github/downloads/SinnoSong/YoutubeDownloader/total.svg)](https://github.com/SinnoSong/YoutubeDownloader/releases)
@@ -30,6 +28,13 @@ This application uses [**YoutubeExplode**](https://github.com/Tyrrrz/YoutubeExpl
 - 🟢 **[Stable release](https://github.com/SinnoSong/YoutubeDownloader/releases/latest)**
 - 🟠 [CI build](https://github.com/SinnoSong/YoutubeDownloader/actions/workflows/main.yml)
 
+> **重要**:
+> 在MacOS上运行当前程序，需要先将下载的文件移出隔离区。
+> 你可以通过在终端中运行以下命令来完成：`xattr -rd com.apple.quarantine YoutubeDownloader.app`。
+
+> **注意**:
+> 如果你不确定哪个版本适合你的系统，请参考 [这个页面](https://useragent.cc) 来确定你的操作系统和CPU架构。
+
 ## 功能
 
 - 跨平台用户界面 （暂未测试linux和mac系统）
@@ -55,15 +60,6 @@ This application uses [**YoutubeExplode**](https://github.com/Tyrrrz/YoutubeExpl
 
 - 新增功能需要进入设置页面设置
 
-
-> **重要**:
-> 为了运行 **YoutubeDownloader**, 你需要确保你已经安装了 **.NET 8.0 Runtime** .
-> 可以在下面的列表中选择安装:
->
-> - [.NET 8.0 Runtime for **macOS x64**](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-8.0.0-macos-x64-installer)
-> - [.NET 8.0 Runtime for **macOS arm64**](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-8.0.0-macos-arm64-installer)
-> - [.NET 8.0 Runtime for **Linux**](https://learn.microsoft.com/dotnet/core/install/linux) (需要为你所使用的发行版找到正确的安装)
-> - 在 **Windows**, 运行时会在第一次运行的时候自动安装
 
 ## 截图
 

@@ -28,18 +28,12 @@ public partial class DashboardViewModel : ViewModelBase
 
     private readonly DisposableCollector _eventRoot = new();
     private readonly ResizableSemaphore _downloadSemaphore = new();
+    private readonly VideoDownloader _videoDownloader = new();
+    private readonly MediaTagInjector _mediaTagInjector = new();
+    private readonly ThumbnailDownloader _thumbnailDownloader = new();
+    private readonly ClosedCaptionsDownloader _closedCaptionsDownloader = new();
+    private readonly Translater _translater = new();
     private readonly AutoResetProgressMuxer _progressMuxer;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsProgressIndeterminate))]
-    [NotifyCanExecuteChangedFor(nameof(ProcessQueryCommand))]
-    [NotifyCanExecuteChangedFor(nameof(ShowAuthSetupCommand))]
-    [NotifyCanExecuteChangedFor(nameof(ShowSettingsCommand))]
-    private bool _isBusy;
-
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(ProcessQueryCommand))]
-    private string? _query;
 
     public DashboardViewModel(
         ViewModelManager viewModelManager,

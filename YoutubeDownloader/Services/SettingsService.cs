@@ -26,7 +26,7 @@ public partial class SettingsService()
     public partial ThemeVariant Theme { get; set; }
 
     [ObservableProperty]
-    public partial bool IsAutoUpdateEnabled { get; set; } = true;
+    public partial bool IsAutoUpdateEnabled { get; set; } = false;
 
     [ObservableProperty]
     public partial bool IsAuthPersisted { get; set; } = true;
@@ -34,66 +34,28 @@ public partial class SettingsService()
     [ObservableProperty]
     public partial bool ShouldInjectLanguageSpecificAudioStreams { get; set; } = true;
 
-    private bool _shouldInjectSubtitles = true;
-    public bool ShouldInjectSubtitles
-    {
-        get => _shouldInjectSubtitles;
-        set => SetProperty(ref _shouldInjectSubtitles, value);
-    }
-
-    #region 新增配置
-    private string _translateKey = "";
-    public string TranslateKey
-    {
-        get => _translateKey;
-        set => SetProperty(ref _translateKey, value);
-    }
-
-    private string _baiduAppId = "";
-    public string BaiduAppId
-    {
-        get => _baiduAppId;
-        set => SetProperty(ref _baiduAppId, value);
-    }
-
-    private bool _shouldDownloadThumbnail = true;
-    public bool ShouldDownloadThumbnail
-    {
-        get => _shouldDownloadThumbnail;
-        set => SetProperty(ref _shouldDownloadThumbnail, value);
-    }
-
-    private bool _shouldDownloadClosedCaptions = true;
-    public bool ShouldDownloadClosedCaptions
-    {
-        get => _shouldDownloadClosedCaptions;
-        set => SetProperty(ref _shouldDownloadClosedCaptions, value);
-    }
     [ObservableProperty]
     public partial bool ShouldInjectSubtitles { get; set; } = true;
 
-    private bool _shouldTranslateCCToChinese = true;
-    public bool ShouldTranslateCCToChinese
-    {
-        get => _shouldTranslateCCToChinese;
-        set => SetProperty(ref _shouldTranslateCCToChinese, value);
-    }
+    #region 新增配置
+
+    [ObservableProperty]
+    public partial string TranslateKey { get; set; } = "";
+
+    [ObservableProperty]
+    public partial string BaiduAppId { get; set; } = "";
+
+    [ObservableProperty]
+    public partial bool ShouldDownloadThumbnail { get; set; } = true;
+
+    [ObservableProperty]
+    public partial bool ShouldDownloadClosedCaptions { get; set; } = true;
+
+    [ObservableProperty]
+    public partial bool ShouldTranslateCCToChinese { get; set; } = true;
+
     #endregion
 
-
-    private bool _shouldInjectTags = true;
-    public bool ShouldInjectTags
-    {
-        get => _shouldInjectTags;
-        set => SetProperty(ref _shouldInjectTags, value);
-    }
-
-    private bool _shouldSkipExistingFiles;
-    public bool ShouldSkipExistingFiles
-    {
-        get => _shouldSkipExistingFiles;
-        set => SetProperty(ref _shouldSkipExistingFiles, value);
-    }
     [ObservableProperty]
     public partial bool ShouldInjectTags { get; set; } = true;
 
