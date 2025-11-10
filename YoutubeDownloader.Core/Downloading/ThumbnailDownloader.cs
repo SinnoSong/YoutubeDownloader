@@ -29,7 +29,8 @@ namespace YoutubeDownloader.Core.Downloading
                     )
                     .OrderByDescending(t => t.Resolution.Area)
                     .Select(t => t.Url)
-                    .FirstOrDefault() ?? $"https://i.ytimg.com/vi/{video.Id}/maxresdefault.jpg";
+                    .FirstOrDefault()
+                ?? $"https://i.ytimg.com/vi/{video.Id}/maxresdefault.jpg";
             await File.WriteAllBytesAsync(
                 tempPath,
                 await Http.Client.GetByteArrayAsync(thumbnailUrl, cancellationToken),
