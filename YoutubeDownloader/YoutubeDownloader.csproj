@@ -10,13 +10,25 @@
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
+
   <PropertyGroup>
     <DownloadFFmpeg>true</DownloadFFmpeg>
     <PublishMacOSBundle>false</PublishMacOSBundle>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <EncryptionSalt>HimalayanPinkSalt</EncryptionSalt>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Expose this property in code -->
+    <ProjectProperty Include="EncryptionSalt" />
+  </ItemGroup>
+
   <ItemGroup>
     <AvaloniaResource Include="..\favicon.ico" Link="favicon.ico" />
   </ItemGroup>
+
   <ItemGroup>
     <None
       Include="ffmpeg.exe"
@@ -25,33 +37,34 @@
     />
     <None Include="ffmpeg" CopyToOutputDirectory="PreserveNewest" Condition="Exists('ffmpeg')" />
   </ItemGroup>
+
   <ItemGroup>
-    <PackageReference Include="AsyncImageLoader.Avalonia" Version="3.4.3" />
-    <PackageReference Include="Avalonia" Version="11.3.0" />
-    <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.3.0" />
-    <PackageReference Include="Avalonia.Desktop" Version="11.3.0" />
-    <PackageReference
-      Include="Avalonia.Diagnostics"
-      Version="11.3.0"
-      Condition="'$(Configuration)' == 'Debug'"
-    />
-    <PackageReference Include="Cogwheel" Version="2.1.0" />
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-    <PackageReference Include="CSharpier.MsBuild" Version="1.1.2" PrivateAssets="all" />
-    <PackageReference Include="Deorcify" Version="1.1.0" PrivateAssets="all" />
-    <PackageReference Include="DialogHost.Avalonia" Version="0.9.3" />
-    <PackageReference Include="Gress" Version="2.1.1" />
-    <PackageReference Include="Material.Avalonia" Version="3.9.2" />
-    <PackageReference Include="Material.Avalonia.DataGrid" Version="3.9.2" />
-    <PackageReference Include="Material.Icons.Avalonia" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.3" />
-    <PackageReference Include="Onova" Version="2.6.13" />
-    <PackageReference Include="WebView.Avalonia" Version="11.0.0.1" />
-    <PackageReference Include="WebView.Avalonia.Desktop" Version="11.0.0.1" />
+    <PackageReference Include="AsyncImageLoader.Avalonia" />
+    <PackageReference Include="Avalonia" />
+    <PackageReference Include="Avalonia.Controls.DataGrid" />
+    <PackageReference Include="Avalonia.Desktop" />
+    <PackageReference Include="Avalonia.Diagnostics" Condition="'$(Configuration)' == 'Debug'" />
+    <PackageReference Include="Cogwheel" />
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="CSharpier.MsBuild" PrivateAssets="all" />
+    <PackageReference Include="Deorcify" PrivateAssets="all" />
+    <PackageReference Include="DialogHost.Avalonia" />
+    <PackageReference Include="Gress" />
+    <PackageReference Include="Markdig" />
+    <PackageReference Include="Material.Avalonia" />
+    <PackageReference Include="Material.Avalonia.DataGrid" />
+    <PackageReference Include="Material.Icons.Avalonia" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Onova" />
+    <PackageReference Include="ThisAssembly.Project" PrivateAssets="all" />
+    <PackageReference Include="WebView.Avalonia" />
+    <PackageReference Include="WebView.Avalonia.Desktop" />
   </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\YoutubeDownloader.Core\YoutubeDownloader.Core.csproj" />
   </ItemGroup>
+
   <!-- Avalonia.WebView is completely incompatible with trimming -->
   <ItemGroup>
     <TrimmerRootAssembly Include="Avalonia.WebView" />
@@ -65,6 +78,8 @@
     <TrimmerRootAssembly Include="WebView.Avalonia" />
     <TrimmerRootAssembly Include="WebView.Core" />
   </ItemGroup>
+
+  <!-- Download FFmpeg -->
   <Target
     Name="DownloadFFmpeg"
     BeforeTargets="PreBuildEvent"
@@ -80,6 +95,7 @@
       LogStandardErrorAsError="true"
       Condition="'$(RuntimeIdentifier)' == ''"
     />
+
     <!-- Update FFmpeg references so that the files get copied to the output within the same build sequence -->
     <ItemGroup>
       <None
@@ -90,6 +106,8 @@
       <None Include="ffmpeg" CopyToOutputDirectory="PreserveNewest" Condition="Exists('ffmpeg')" />
     </ItemGroup>
   </Target>
+
+  <!-- Publish macOS bundle -->
   <Target Name="PublishMacOSBundle" AfterTargets="Publish" Condition="$(PublishMacOSBundle)">
     <Exec
       Command="pwsh -ExecutionPolicy Bypass -File $(ProjectDir)/Publish-MacOSBundle.ps1 -PublishDirPath $(PublishDir) -IconsFilePath $(ProjectDir)/../favicon.icns -FullVersion $(Version) -ShortVersion $(AssemblyVersion)"

@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
 using CommunityToolkit.Mvvm.Input;
 using YoutubeDownloader.Core.Downloading;
 using YoutubeDownloader.Framework;
+using YoutubeDownloader.Localization;
 using YoutubeDownloader.Services;
-using YoutubeDownloader.Utils;
 using YoutubeDownloader.Utils.Extensions;
 using YoutubeDownloader.ViewModels.Components;
 
@@ -16,6 +18,7 @@ public partial class MainViewModel(
     ViewModelManager viewModelManager,
     DialogManager dialogManager,
     SnackbarManager snackbarManager,
+    LocalizationManager localizationManager,
     SettingsService settingsService,
     UpdateService updateService
 ) : ViewModelBase
@@ -30,14 +33,10 @@ public partial class MainViewModel(
             return;
 
         var dialog = viewModelManager.CreateMessageBoxViewModel(
-            "Thank you for supporting Ukraine!",
-            """
-            As Russia wages a genocidal war against my country, I'm grateful to everyone who continues to stand with Ukraine in our fight for freedom.
-
-            Click LEARN MORE to find ways that you can help.
-            """,
-            "LEARN MORE",
-            "CLOSE"
+            localizationManager.UkraineSupportTitle,
+            localizationManager.UkraineSupportMessage,
+            localizationManager.LearnMoreButton,
+            localizationManager.CloseButton
         );
 
         // Disable this message in the future
@@ -45,7 +44,7 @@ public partial class MainViewModel(
         settingsService.Save();
 
         if (await dialogManager.ShowDialogAsync(dialog) == true)
-            ProcessEx.StartShellExecute("https://tyrrrz.me/ukraine?source=youtubedownloader");
+            Process.StartShellExecute("https://tyrrrz.me/ukraine?source=youtubedownloader");
     }
 
     private async Task ShowDevelopmentBuildMessageAsync()
@@ -58,42 +57,62 @@ public partial class MainViewModel(
             return;
 
         var dialog = viewModelManager.CreateMessageBoxViewModel(
-            "Unstable build warning",
-            $"""
-            You're using a development build of {Program.Name}. These builds are not thoroughly tested and may contain bugs.
-
-            Auto-updates are disabled for development builds.
-
-            Click SEE RELEASES if you want to download a stable release instead.
-            """,
-            "SEE RELEASES",
-            "CLOSE"
+            localizationManager.UnstableBuildTitle,
+            string.Format(localizationManager.UnstableBuildMessage, Program.Name),
+            localizationManager.SeeReleasesButton,
+            localizationManager.CloseButton
         );
 
         if (await dialogManager.ShowDialogAsync(dialog) == true)
-            ProcessEx.StartShellExecute(Program.ProjectReleasesUrl);
+            Process.StartShellExecute(Program.ProjectReleasesUrl);
     }
 
-    private async Task ShowFFmpegMessageAsync()
+    private async Task ShowFFmpegMissingMessageAsync()
     {
-        if (FFmpeg.IsAvailable())
-            return;
+        if (settingsService.FFmpegFilePath is { } ffmpegFilePath)
+        {
+            // Explicit path set — only show the dialog if the file is missing
+            if (File.Exists(ffmpegFilePath))
+                return;
 
-        var dialog = viewModelManager.CreateMessageBoxViewModel(
-            "FFmpeg is missing",
-            $"""
-            FFmpeg is required for {Program.Name} to work. Please download it and make it available in the application directory or on the system PATH.
+            var dialog = viewModelManager.CreateMessageBoxViewModel(
+                localizationManager.FFmpegMissingTitle,
+                string.Format(localizationManager.FFmpegPathMissingMessage, ffmpegFilePath),
+                localizationManager.SettingsButton,
+                localizationManager.CloseButton
+            );
 
-            Alternatively, you can also download a version of {Program.Name} that has FFmpeg bundled with it. Look for release assets that are NOT marked as *.Bare.
+            if (await dialogManager.ShowDialogAsync(dialog) == true)
+                await dialogManager.ShowDialogAsync(viewModelManager.CreateSettingsViewModel());
+        }
+        else
+        {
+            // No explicit path — fall back to auto-detection check
+            if (FFmpeg.TryGetCliFilePath() is not null)
+                return;
 
-            Click DOWNLOAD to go to the FFmpeg download page.
-            """,
-            "DOWNLOAD",
-            "CLOSE"
-        );
+            var dialog = viewModelManager.CreateMessageBoxViewModel(
+                localizationManager.FFmpegMissingTitle,
+                $"""
+                {string.Format(localizationManager.FFmpegMissingMessage, Program.Name)}
 
-        if (await dialogManager.ShowDialogAsync(dialog) == true)
-            ProcessEx.StartShellExecute("https://ffmpeg.org/download.html");
+                ――――――――――――――――――――――――――――――――――――――――――
+
+                {string.Format(localizationManager.FFmpegMissingSearchedLabel, FFmpeg.CliFileName)}
+                {string.Join(
+                    Environment.NewLine,
+                    FFmpeg.GetProbeDirectoryPaths().Distinct(StringComparer.Ordinal).Select(d =>
+                        $"- {d}"
+                    )
+                )}
+                """,
+                localizationManager.DownloadButton,
+                localizationManager.CloseButton
+            );
+
+            if (await dialogManager.ShowDialogAsync(dialog) == true)
+                Process.StartShellExecute("https://ffmpeg.org/download.html");
+        }
 
         if (Application.Current?.ApplicationLifetime?.TryShutdown(3) != true)
             Environment.Exit(3);
@@ -107,12 +126,18 @@ public partial class MainViewModel(
             if (updateVersion is null)
                 return;
 
-            snackbarManager.Notify($"Downloading update to {Program.Name} v{updateVersion}...");
+            snackbarManager.Notify(
+                string.Format(
+                    localizationManager.UpdateDownloadingMessage,
+                    Program.Name,
+                    updateVersion
+                )
+            );
             await updateService.PrepareUpdateAsync(updateVersion);
 
             snackbarManager.Notify(
-                "Update has been downloaded and will be installed when you exit",
-                "INSTALL NOW",
+                localizationManager.UpdateReadyMessage,
+                localizationManager.UpdateInstallNowButton,
                 () =>
                 {
                     updateService.FinalizeUpdate(true);
@@ -125,7 +150,7 @@ public partial class MainViewModel(
         catch
         {
             // Failure to update shouldn't crash the application
-            snackbarManager.Notify("Failed to perform application update");
+            snackbarManager.Notify(localizationManager.UpdateFailedMessage);
         }
     }
 
@@ -134,7 +159,7 @@ public partial class MainViewModel(
     {
         await ShowUkraineSupportMessageAsync();
         await ShowDevelopmentBuildMessageAsync();
-        await ShowFFmpegMessageAsync();
+        await ShowFFmpegMissingMessageAsync();
         await CheckForUpdatesAsync();
     }
 

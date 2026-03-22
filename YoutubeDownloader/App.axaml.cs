@@ -8,6 +8,7 @@ using AvaloniaWebView;
 using Material.Styles.Themes;
 using Microsoft.Extensions.DependencyInjection;
 using YoutubeDownloader.Framework;
+using YoutubeDownloader.Localization;
 using YoutubeDownloader.Services;
 using YoutubeDownloader.Utils;
 using YoutubeDownloader.Utils.Extensions;
@@ -26,6 +27,8 @@ public class App : Application, IDisposable
     private readonly SettingsService _settingsService;
     private readonly MainViewModel _mainViewModel;
 
+    private bool _isDisposed;
+
     public App()
     {
         var services = new ServiceCollection();
@@ -35,6 +38,9 @@ public class App : Application, IDisposable
         services.AddSingleton<SnackbarManager>();
         services.AddSingleton<ViewManager>();
         services.AddSingleton<ViewModelManager>();
+
+        // Localization
+        services.AddSingleton<LocalizationManager>();
 
         // Services
         services.AddSingleton<SettingsService>();
@@ -105,11 +111,27 @@ public class App : Application, IDisposable
     public override void OnFrameworkInitializationCompleted()
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
             desktop.MainWindow = new MainView { DataContext = _mainViewModel };
+
+            void OnExit(object? sender, ControlledApplicationLifetimeExitEventArgs args)
+            {
+                if (sender is IControlledApplicationLifetime lifetime)
+                    lifetime.Exit -= OnExit;
+
+                Dispose();
+            }
+
+            // Although `App.Dispose()` is invoked from `Program.Main(...)`, on some platforms
+            // it may be called too late in the shutdown lifecycle. Attach an exit
+            // handler to ensure timely disposal as a safeguard.
+            // https://github.com/Tyrrrz/YoutubeDownloader/issues/795
+            desktop.Exit += OnExit;
+        }
 
         base.OnFrameworkInitializationCompleted();
 
-        // Set up custom theme colors
+        // Set up initial custom theme colors
         InitializeTheme();
 
         // Load settings
@@ -122,6 +144,11 @@ public class App : Application, IDisposable
 
     public void Dispose()
     {
+        if (_isDisposed)
+            return;
+
+        _isDisposed = true;
+
         _eventRoot.Dispose();
         _services.Dispose();
     }

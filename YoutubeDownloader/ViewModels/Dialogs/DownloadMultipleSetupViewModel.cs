@@ -9,8 +9,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using YoutubeDownloader.Core.Downloading;
 using YoutubeDownloader.Framework;
+using YoutubeDownloader.Localization;
 using YoutubeDownloader.Services;
-using YoutubeDownloader.Utils;
 using YoutubeDownloader.Utils.Extensions;
 using YoutubeDownloader.ViewModels.Components;
 using YoutubeExplode.Videos;
@@ -21,9 +21,12 @@ namespace YoutubeDownloader.ViewModels.Dialogs;
 public partial class DownloadMultipleSetupViewModel(
     ViewModelManager viewModelManager,
     DialogManager dialogManager,
+    LocalizationManager localizationManager,
     SettingsService settingsService
 ) : DialogViewModelBase<IReadOnlyList<DownloadViewModel>>
 {
+    public LocalizationManager LocalizationManager { get; } = localizationManager;
+
     [ObservableProperty]
     public partial string? Title { get; set; }
 
@@ -88,10 +91,10 @@ public partial class DownloadMultipleSetupViewModel(
             if (settingsService.ShouldSkipExistingFiles && File.Exists(baseFilePath))
                 continue;
 
-            var filePath = PathEx.EnsureUniquePath(baseFilePath);
+            var filePath = Path.EnsureUniqueFilePath(baseFilePath);
 
             // Download does not start immediately, so lock in the file path to avoid conflicts
-            DirectoryEx.CreateDirectoryForFile(filePath);
+            Directory.CreateDirectoryForFile(filePath);
             await File.WriteAllBytesAsync(filePath, []);
 
             downloads.Add(

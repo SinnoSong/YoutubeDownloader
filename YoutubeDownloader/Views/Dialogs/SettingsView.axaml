@@ -2,7 +2,9 @@
     x:Class="YoutubeDownloader.Views.Dialogs.SettingsView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="clr-namespace:YoutubeDownloader.Converters"
     xmlns:dialogs="clr-namespace:YoutubeDownloader.ViewModels.Dialogs"
+    xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
     Width="380"
     x:DataType="dialogs:SettingsViewModel">
     <Grid RowDefinitions="Auto,*,Auto">
@@ -11,9 +13,9 @@
             Margin="16"
             FontSize="19"
             FontWeight="Light"
-            Text="Settings" />
+            Text="{Binding LocalizationManager.SettingsTitle}" />
 
-		<Border
+        <Border
             Grid.Row="1"
             Padding="0,8"
             BorderBrush="{DynamicResource MaterialDividerBrush}"
@@ -24,8 +26,8 @@
                     <DockPanel
                         Margin="16,8"
                         LastChildFill="False"
-                        ToolTip.Tip="Preferred user interface theme">
-                        <TextBlock DockPanel.Dock="Left" Text="Theme" />
+                        ToolTip.Tip="{Binding LocalizationManager.ThemeTooltip}">
+                        <TextBlock DockPanel.Dock="Left" Text="{Binding LocalizationManager.ThemeLabel}" />
                         <ComboBox
                             Width="150"
                             DockPanel.Dock="Right"
@@ -33,49 +35,97 @@
                             SelectedItem="{Binding Theme}" />
                     </DockPanel>
 
+                    <!--  Language  -->
+                    <DockPanel
+                        Margin="16,8"
+                        LastChildFill="False"
+                        ToolTip.Tip="{Binding LocalizationManager.LanguageTooltip}">
+                        <TextBlock DockPanel.Dock="Left" Text="{Binding LocalizationManager.LanguageLabel}" />
+                        <ComboBox
+                            Width="150"
+                            DockPanel.Dock="Right"
+                            ItemsSource="{Binding AvailableLanguages}"
+                            SelectedItem="{Binding Language}" />
+                    </DockPanel>
+
                     <!--  Auto-updates  -->
                     <DockPanel
                         Margin="16,8"
-                        IsVisible="{OnPlatform False,
-                                               Windows=True}"
+                        IsVisible="{Binding IsAutoUpdateAvailable}"
                         LastChildFill="False">
-						<ToolTip.Tip>
-							<TextBlock>
-								<Run Text="Perform automatic updates on every launch." />
-								<LineBreak />
-								<Run FontWeight="SemiBold" Text="Warning:" />
-								<Run Text="it's recommended to leave this option enabled to ensure that the app" />
-								<LineBreak />
-								<Run Text=" " />
-								<Run Text="is compatible with the latest version of YouTube." />
-							</TextBlock>
-						</ToolTip.Tip>
-						<TextBlock DockPanel.Dock="Left" Text="Auto-update" />
-						<ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding IsAutoUpdateEnabled}" />
-					</DockPanel>
+                        <ToolTip.Tip>
+                            <TextBlock Inlines="{Binding LocalizationManager.AutoUpdateTooltip, Converter={x:Static converters:MarkdownToInlinesConverter.Instance}}" />
+                        </ToolTip.Tip>
+                        <TextBlock DockPanel.Dock="Left" Text="{Binding LocalizationManager.AutoUpdateLabel}" />
+                        <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding IsAutoUpdateEnabled}" />
+                    </DockPanel>
 
                     <!--  Persist authentication  -->
                     <DockPanel
                         IsVisible="{OnPlatform False,
                                                Windows=True}"
-                        LastChildFill="False"
-                        ToolTip.Tip="Save authentication cookies to a file so that they can be persisted between sessions">
-						<TextBlock
+                        LastChildFill="False">
+                        <ToolTip.Tip>
+                            <TextBlock Inlines="{Binding LocalizationManager.PersistAuthTooltip, Converter={x:Static converters:MarkdownToInlinesConverter.Instance}}" />
+                        </ToolTip.Tip>
+                        <TextBlock
                             Margin="16,8"
                             DockPanel.Dock="Left"
-                            Text="Persist authentication" />
-						<ToggleSwitch
+                            Text="{Binding LocalizationManager.PersistAuthLabel}" />
+                        <ToggleSwitch
                             Margin="16,8"
                             DockPanel.Dock="Right"
                             IsChecked="{Binding IsAuthPersisted}" />
-					</DockPanel>
+                    </DockPanel>
+
+                    <!--  FFmpeg path  -->
+                    <DockPanel
+                        Margin="16,8"
+                        LastChildFill="False"
+                        ToolTip.Tip="{Binding LocalizationManager.FFmpegPathTooltip}">
+                        <TextBlock DockPanel.Dock="Left" Text="{Binding LocalizationManager.FFmpegPathLabel}" />
+                        <TextBox
+                            Width="150"
+                            Height="20"
+                            DockPanel.Dock="Right"
+                            FontSize="13"
+                            Text="{Binding FFmpegFilePath}"
+                            Theme="{DynamicResource CompactTextBox}"
+                            Watermark="{Binding LocalizationManager.FFmpegPathWatermark}">
+                            <TextBox.InnerRightContent>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button
+                                        Padding="4"
+                                        Command="{Binding ResetFFmpegFilePathCommand}"
+                                        IsEnabled="{Binding FFmpegFilePath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                        Theme="{DynamicResource MaterialFlatButton}"
+                                        ToolTip.Tip="{Binding LocalizationManager.FFmpegPathResetTooltip}">
+                                        <materialIcons:MaterialIcon
+                                            Width="14"
+                                            Height="14"
+                                            Kind="Close" />
+                                    </Button>
+                                    <Button
+                                        Padding="4"
+                                        Command="{Binding BrowseFFmpegFilePathCommand}"
+                                        Theme="{DynamicResource MaterialFlatButton}"
+                                        ToolTip.Tip="{Binding LocalizationManager.FFmpegPathBrowseTooltip}">
+                                        <materialIcons:MaterialIcon
+                                            Width="14"
+                                            Height="14"
+                                            Kind="FolderOpen" />
+                                    </Button>
+                                </StackPanel>
+                            </TextBox.InnerRightContent>
+                        </TextBox>
+                    </DockPanel>
 
                     <!--  Inject language-specific audio streams  -->
                     <DockPanel
                         Margin="16,8"
                         LastChildFill="False"
-                        ToolTip.Tip="Inject audio tracks in alternative languages (if available) into downloaded files">
-                        <TextBlock DockPanel.Dock="Left" Text="Inject alternative languages" />
+                        ToolTip.Tip="{Binding LocalizationManager.InjectAltLanguagesTooltip}">
+                        <TextBlock DockPanel.Dock="Left" Text="{Binding LocalizationManager.InjectAltLanguagesLabel}" />
                         <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding ShouldInjectLanguageSpecificAudioStreams}" />
                     </DockPanel>
 
@@ -83,149 +133,128 @@
                     <DockPanel
                         Margin="16,8"
                         LastChildFill="False"
-                        ToolTip.Tip="Inject subtitles (if available) into downloaded files">
-                        <TextBlock DockPanel.Dock="Left" Text="Inject subtitles" />
+                        ToolTip.Tip="{Binding LocalizationManager.InjectSubtitlesTooltip}">
+                        <TextBlock DockPanel.Dock="Left" Text="{Binding LocalizationManager.InjectSubtitlesLabel}" />
                         <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding ShouldInjectSubtitles}" />
                     </DockPanel>
 
-					<!--  Inject tags  -->
-					<DockPanel
+                    <!--  Inject tags  -->
+                    <DockPanel
                         Margin="16,8"
                         LastChildFill="False"
-                        ToolTip.Tip="Inject media tags (if available) into downloaded files">
-                        <TextBlock DockPanel.Dock="Left" Text="Inject media tags" />
+                        ToolTip.Tip="{Binding LocalizationManager.InjectTagsTooltip}">
+                        <TextBlock DockPanel.Dock="Left" Text="{Binding LocalizationManager.InjectTagsLabel}" />
                         <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding ShouldInjectTags}" />
                     </DockPanel>
 
-					<!--  Download Thumbnail  -->
-					<DockPanel
+                    <!--  Download Thumbnail  -->
+                    <DockPanel
                         Margin="16,8"
                         LastChildFill="False"
                         ToolTip.Tip="Download thumbnail into the path of downloaded files">
-						<TextBlock DockPanel.Dock="Left" Text="Download Thumbnail" />
-						<ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding ShouldDownloadThumbnail}" />
-					</DockPanel>
+                        <TextBlock DockPanel.Dock="Left" Text="Download Thumbnail" />
+                        <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding ShouldDownloadThumbnail}" />
+                    </DockPanel>
 
-					<!--  Download ClosedCaption  -->
-					<DockPanel
+                    <!--  Download ClosedCaption  -->
+                    <DockPanel
                         Margin="16,8"
                         LastChildFill="False"
                         ToolTip.Tip="Download subtitles into the path of downloaded files">
-						<TextBlock DockPanel.Dock="Left" Text="Download subtitles" />
-						<ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding ShouldDownloadClosedCaption}" />
-					</DockPanel>
+                        <TextBlock DockPanel.Dock="Left" Text="Download subtitles" />
+                        <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding ShouldDownloadClosedCaption}" />
+                    </DockPanel>
 
-					<!--  Translate ClosedCaption to Chinese  -->
-					<DockPanel
+                    <!--  Translate ClosedCaption to Chinese  -->
+                    <DockPanel
                         Margin="16,8"
                         LastChildFill="False"
                         ToolTip.Tip="Translate subtitles srt file to Chinese srt">
-						<TextBlock DockPanel.Dock="Left" Text="Translate ClosedCaption to Chinese" />
-						<ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding ShouldTranslateCCToChinese}" />
-					</DockPanel>
+                        <TextBlock DockPanel.Dock="Left" Text="Translate ClosedCaption to Chinese" />
+                        <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding ShouldTranslateCCToChinese}" />
+                    </DockPanel>
 
-					<!--  Skip existing files  -->
-					<DockPanel
+                    <!--  Skip existing files  -->
+                    <DockPanel
                         Margin="16,8"
                         LastChildFill="False"
-                        ToolTip.Tip="When downloading multiple videos, skip those that already have matching files in the output directory">
-						<TextBlock DockPanel.Dock="Left" Text="Skip existing files" />
-						<ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding ShouldSkipExistingFiles}" />
-					</DockPanel>
+                        ToolTip.Tip="{Binding LocalizationManager.SkipExistingFilesTooltip}">
+                        <TextBlock DockPanel.Dock="Left" Text="{Binding LocalizationManager.SkipExistingFilesLabel}" />
+                        <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding ShouldSkipExistingFiles}" />
+                    </DockPanel>
 
-					<!--  File name template  -->
-					<DockPanel Margin="16,8" LastChildFill="False">
-						<ToolTip.Tip>
-							<TextBlock>
-								<Run Text="Template used for generating file names for downloaded videos." />
-								<LineBreak />
-								<LineBreak />
-								<Run Text="Available tokens:" />
-								<LineBreak />
-								<Run Text=" " />
-								<Run FontWeight="SemiBold" Text="$num" />
-								<Run Text="— video's position in the list (if applicable)" />
-								<LineBreak />
-								<Run Text=" " />
-								<Run FontWeight="SemiBold" Text="$id" />
-								<Run Text="— video ID" />
-								<LineBreak />
-								<Run Text=" " />
-								<Run FontWeight="SemiBold" Text="$title" />
-								<Run Text="— video title" />
-								<LineBreak />
-								<Run Text=" " />
-								<Run FontWeight="SemiBold" Text="$author" />
-								<Run Text="— video author" />
-							</TextBlock>
-						</ToolTip.Tip>
-						<TextBlock DockPanel.Dock="Left" Text="File name template" />
-						<TextBox
+                    <!--  File name template  -->
+                    <DockPanel Margin="16,8" LastChildFill="False">
+                        <ToolTip.Tip>
+                            <TextBlock Inlines="{Binding LocalizationManager.FileNameTemplateTooltip, Converter={x:Static converters:MarkdownToInlinesConverter.Instance}}" />
+                        </ToolTip.Tip>
+                        <TextBlock DockPanel.Dock="Left" Text="{Binding LocalizationManager.FileNameTemplateLabel}" />
+                        <TextBox
                             Width="150"
                             Height="20"
                             DockPanel.Dock="Right"
                             FontSize="13"
                             Text="{Binding FileNameTemplate}"
                             Theme="{DynamicResource CompactTextBox}" />
-					</DockPanel>
+                    </DockPanel>
 
-					<!--  Translate key  -->
-					<DockPanel
-                        Margin="16,8" LastChildFill="False" ToolTip.Tip="Translate Key for Microsoft Translate API">
-						<TextBlock DockPanel.Dock="Left" Text="Azure Translate Key" />
-						<TextBox
+                    <!--  Translate key  -->
+                    <DockPanel Margin="16,8" LastChildFill="False" ToolTip.Tip="Translate Key for Microsoft Translate API">
+                        <TextBlock DockPanel.Dock="Left" Text="Azure Translate Key" />
+                        <TextBox
                             Width="150"
                             Height="20"
                             DockPanel.Dock="Right"
                             FontSize="13"
                             Text="{Binding TranslateKey}"
                             Theme="{DynamicResource CompactTextBox}" />
-					</DockPanel>
+                    </DockPanel>
 
-					<!--  Baidu Translate AppId  -->
-					<DockPanel
+                    <!--  Baidu Translate AppId  -->
+                    <DockPanel
                         Margin="16,8"
-                        LastChildFill="False" ToolTip.Tip="AppId for Baidu Translate API">
-						<TextBlock DockPanel.Dock="Left" Text="Baidu AppId" />
-						<TextBox
+                        LastChildFill="False"
+                        ToolTip.Tip="AppId for Baidu Translate API">
+                        <TextBlock DockPanel.Dock="Left" Text="Baidu AppId" />
+                        <TextBox
                             Width="150"
                             Height="20"
                             DockPanel.Dock="Right"
                             FontSize="13"
                             Text="{Binding BaiduAppId}"
                             Theme="{DynamicResource CompactTextBox}" />
-					</DockPanel>
+                    </DockPanel>
 
-					<!--  Parallel limit  -->
-					<DockPanel
+                    <!--  Parallel limit  -->
+                    <DockPanel
                         Margin="16,8"
                         LastChildFill="False"
-                        ToolTip.Tip="How many downloads can be active at the same time">
-						<TextBlock DockPanel.Dock="Left" Text="Parallel limit" />
-						<StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-							<TextBlock Margin="10,0" Text="{Binding ParallelLimit}" />
-							<Slider
+                        ToolTip.Tip="{Binding LocalizationManager.ParallelLimitTooltip}">
+                        <TextBlock DockPanel.Dock="Left" Text="{Binding LocalizationManager.ParallelLimitLabel}" />
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                            <TextBlock Margin="10,0" Text="{Binding ParallelLimit}" />
+                            <Slider
                                 Width="150"
                                 IsSnapToTickEnabled="True"
                                 Maximum="10"
                                 Minimum="1"
                                 TickFrequency="1"
                                 Value="{Binding ParallelLimit}" />
-						</StackPanel>
-					</DockPanel>
-				</StackPanel>
-			</ScrollViewer>
-		</Border>
+                        </StackPanel>
+                    </DockPanel>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
 
-		<!--  Close button  -->
-		<Button
+        <!--  Close button  -->
+        <Button
             Grid.Row="2"
             Margin="16"
             HorizontalAlignment="Stretch"
             Command="{Binding CloseCommand}"
-            Content="CLOSE"
+            Content="{Binding LocalizationManager.CloseButton}"
             IsCancel="True"
             IsDefault="True"
             Theme="{DynamicResource MaterialOutlineButton}" />
-	</Grid>
+    </Grid>
 </UserControl>

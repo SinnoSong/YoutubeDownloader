@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -8,16 +7,14 @@ using Cogwheel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using YoutubeDownloader.Core.Downloading;
 using YoutubeDownloader.Framework;
+using YoutubeDownloader.Localization;
 using Container = YoutubeExplode.Videos.Streams.Container;
 
 namespace YoutubeDownloader.Services;
 
 [ObservableObject]
 public partial class SettingsService()
-    : SettingsBase(
-        Path.Combine(AppContext.BaseDirectory, "Settings.dat"),
-        SerializerContext.Default
-    )
+    : SettingsBase(StartOptions.Current.SettingsPath, SerializerContext.Default)
 {
     [ObservableProperty]
     public partial bool IsUkraineSupportMessageEnabled { get; set; } = true;
@@ -26,10 +23,16 @@ public partial class SettingsService()
     public partial ThemeVariant Theme { get; set; }
 
     [ObservableProperty]
+    public partial Language Language { get; set; }
+
+    [ObservableProperty]
     public partial bool IsAutoUpdateEnabled { get; set; } = false;
 
     [ObservableProperty]
     public partial bool IsAuthPersisted { get; set; } = true;
+
+    [ObservableProperty]
+    public partial string? FFmpegFilePath { get; set; }
 
     [ObservableProperty]
     public partial bool ShouldInjectLanguageSpecificAudioStreams { get; set; } = true;
@@ -69,6 +72,7 @@ public partial class SettingsService()
     public partial int ParallelLimit { get; set; } = 2;
 
     [ObservableProperty]
+    [JsonConverter(typeof(AuthCookiesEncryptionConverter))]
     public partial IReadOnlyList<Cookie>? LastAuthCookies { get; set; }
 
     [ObservableProperty]

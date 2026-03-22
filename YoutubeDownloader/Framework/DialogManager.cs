@@ -39,12 +39,32 @@ public class DialogManager : IDisposable
                 }
             );
 
+            // Yield to allow DialogHost to fully reset its state before
+            // another dialog is shown (e.g. when dialogs are shown sequentially)
+            await Task.Yield();
+
             return dialog.DialogResult;
         }
         finally
         {
             _dialogLock.Release();
         }
+    }
+
+    public async Task<string?> PromptOpenFilePathAsync(
+        IReadOnlyList<FilePickerFileType>? fileTypes = null
+    )
+    {
+        var topLevel =
+            Application.Current?.ApplicationLifetime?.TryGetTopLevel()
+            ?? throw new ApplicationException("Could not find the top-level visual element.");
+
+        var result = await topLevel.StorageProvider.OpenFilePickerAsync(
+            new FilePickerOpenOptions { FileTypeFilter = fileTypes, AllowMultiple = false }
+        );
+
+        var file = result.FirstOrDefault();
+        return file?.TryGetLocalPath() ?? file?.Path.ToString();
     }
 
     public async Task<string?> PromptSaveFilePathAsync(

@@ -1,24 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using Avalonia.Platform.Storage;
+using CommunityToolkit.Mvvm.Input;
 using YoutubeDownloader.Framework;
+using YoutubeDownloader.Localization;
 using YoutubeDownloader.Services;
 using YoutubeDownloader.Utils;
 using YoutubeDownloader.Utils.Extensions;
 
 namespace YoutubeDownloader.ViewModels.Dialogs;
 
-public class SettingsViewModel : DialogViewModelBase
+public partial class SettingsViewModel : DialogViewModelBase
 {
+    private readonly DialogManager _dialogManager;
     private readonly SettingsService _settingsService;
 
     private readonly DisposableCollector _eventRoot = new();
 
-    public SettingsViewModel(SettingsService settingsService)
+    public SettingsViewModel(
+        DialogManager dialogManager,
+        LocalizationManager localizationManager,
+        SettingsService settingsService
+    )
     {
+        _dialogManager = dialogManager;
+        LocalizationManager = localizationManager;
         _settingsService = settingsService;
 
         _eventRoot.Add(_settingsService.WatchAllProperties(OnAllPropertiesChanged));
     }
+
+    public LocalizationManager LocalizationManager { get; }
 
     public IReadOnlyList<ThemeVariant> AvailableThemes { get; } = Enum.GetValues<ThemeVariant>();
 
@@ -27,6 +40,17 @@ public class SettingsViewModel : DialogViewModelBase
         get => _settingsService.Theme;
         set => _settingsService.Theme = value;
     }
+
+    public IReadOnlyList<Language> AvailableLanguages { get; } = Enum.GetValues<Language>();
+
+    public Language Language
+    {
+        get => _settingsService.Language;
+        set => _settingsService.Language = value;
+    }
+
+    public bool IsAutoUpdateAvailable { get; } =
+        OperatingSystem.IsWindows() && StartOptions.Current.IsAutoUpdateAllowed;
 
     public bool IsAutoUpdateEnabled
     {
@@ -38,6 +62,12 @@ public class SettingsViewModel : DialogViewModelBase
     {
         get => _settingsService.IsAuthPersisted;
         set => _settingsService.IsAuthPersisted = value;
+    }
+
+    public string? FFmpegFilePath
+    {
+        get => _settingsService.FFmpegFilePath;
+        set => _settingsService.FFmpegFilePath = !string.IsNullOrWhiteSpace(value) ? value : null;
     }
 
     public bool ShouldInjectLanguageSpecificAudioStreams
@@ -105,6 +135,28 @@ public class SettingsViewModel : DialogViewModelBase
         get => _settingsService.ParallelLimit;
         set => _settingsService.ParallelLimit = Math.Clamp(value, 1, 10);
     }
+
+    [RelayCommand]
+    private async Task BrowseFFmpegFilePathAsync()
+    {
+        var fileTypes = OperatingSystem.IsWindows()
+            ? new[]
+            {
+                new FilePickerFileType("FFmpeg executable") { Patterns = ["*.exe"] },
+                FilePickerFileTypes.All,
+            }
+            : null;
+
+        var filePath = await _dialogManager.PromptOpenFilePathAsync(fileTypes);
+
+        if (string.IsNullOrWhiteSpace(filePath))
+            return;
+
+        FFmpegFilePath = filePath;
+    }
+
+    [RelayCommand]
+    private void ResetFFmpegFilePath() => FFmpegFilePath = null;
 
     protected override void Dispose(bool disposing)
     {
