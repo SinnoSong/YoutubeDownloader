@@ -1,21 +1,27 @@
 using System;
 using System.Globalization;
-using System.Linq;
 using Avalonia.Data.Converters;
-using YoutubeExplode.Videos;
+using YoutubeDownloader.Localization;
 
 namespace YoutubeDownloader.Converters;
 
-public class VideoToLowestQualityThumbnailUrlStringConverter : IValueConverter
+public class LanguageToStringConverter : IValueConverter
 {
-    public static VideoToLowestQualityThumbnailUrlStringConverter Instance { get; } = new();
+    public static LanguageToStringConverter Instance { get; } = new();
 
     public object? Convert(
         object? value,
         Type targetType,
         object? parameter,
         CultureInfo culture
-    ) => value is IVideo video ? video.Thumbnails.MinBy(t => t.Resolution.Area)?.Url : null;
+    ) =>
+        value is Language language
+            ? language switch
+            {
+                Language.ChineseSimplified => "Simplified Chinese",
+                _ => language.ToString(),
+            }
+            : default;
 
     public object ConvertBack(
         object? value,

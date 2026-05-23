@@ -1,31 +1,25 @@
 using System;
 using System.Globalization;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using CommunityToolkit.Mvvm.ComponentModel;
+using PowerKit;
+using PowerKit.Extensions;
 using YoutubeDownloader.Services;
-using YoutubeDownloader.Utils;
-using YoutubeDownloader.Utils.Extensions;
 
 namespace YoutubeDownloader.Localization;
 
 public partial class LocalizationManager : ObservableObject, IDisposable
 {
-    private readonly DisposableCollector _eventRoot = new();
+    private readonly IDisposable _eventSubscription;
 
     public LocalizationManager(SettingsService settingsService)
     {
-        _eventRoot.Add(
-            settingsService.WatchProperty(
-                o => o.Language,
-                () => Language = settingsService.Language,
-                true
-            )
-        );
-
-        _eventRoot.Add(
+        _eventSubscription = Disposable.Merge(
+            settingsService.WatchProperty(o => o.Language, v => Language = v, true),
             this.WatchProperty(
                 o => o.Language,
-                () =>
+                _ =>
                 {
                     foreach (var propertyName in EnglishLocalization.Keys)
                         OnPropertyChanged(propertyName);
@@ -51,12 +45,19 @@ public partial class LocalizationManager : ObservableObject, IDisposable
                     "deu" => GermanLocalization,
                     "fra" => FrenchLocalization,
                     "spa" => SpanishLocalization,
+                    "zho"
+                        when CultureInfo
+                            .CurrentUICulture.GetSelfAndParents()
+                            .Any(c =>
+                                string.Equals(c.Name, "zh-Hans", StringComparison.OrdinalIgnoreCase)
+                            ) => ChineseSimplifiedLocalization,
                     _ => EnglishLocalization,
                 },
             Language.Ukrainian => UkrainianLocalization,
             Language.German => GermanLocalization,
             Language.French => FrenchLocalization,
             Language.Spanish => SpanishLocalization,
+            Language.ChineseSimplified => ChineseSimplifiedLocalization,
             _ => EnglishLocalization,
         };
 
@@ -72,14 +73,14 @@ public partial class LocalizationManager : ObservableObject, IDisposable
         return $"Missing localization for '{key}'";
     }
 
-    public void Dispose() => _eventRoot.Dispose();
+    public void Dispose() => _eventSubscription.Dispose();
 }
 
 public partial class LocalizationManager
 {
     // ---- Dashboard ----
 
-    public string QueryWatermark => Get();
+    public string QueryPlaceholderText => Get();
     public string QueryTooltip => Get();
     public string ProcessQueryTooltip => Get();
     public string AuthTooltip => Get();
@@ -126,7 +127,7 @@ public partial class LocalizationManager
     public string ParallelLimitTooltip => Get();
     public string FFmpegPathLabel => Get();
     public string FFmpegPathTooltip => Get();
-    public string FFmpegPathWatermark => Get();
+    public string FFmpegPathPlaceholderText => Get();
     public string FFmpegPathResetTooltip => Get();
     public string FFmpegPathBrowseTooltip => Get();
 
@@ -142,6 +143,7 @@ public partial class LocalizationManager
     public string CopyMenuItem => Get();
     public string LiveLabel => Get();
     public string AudioLabel => Get();
+    public string UpscaledLabel => Get();
     public string FormatLabel => Get();
 
     // ---- Download Multiple Setup ----
@@ -154,7 +156,6 @@ public partial class LocalizationManager
     public string CloseButton => Get();
     public string DownloadButton => Get();
     public string CancelButton => Get();
-    public string SettingsButton => Get();
 
     // ---- Dialog messages ----
 
@@ -166,8 +167,8 @@ public partial class LocalizationManager
     public string SeeReleasesButton => Get();
     public string FFmpegMissingTitle => Get();
     public string FFmpegMissingMessage => Get();
-    public string FFmpegPathMissingMessage => Get();
-    public string FFmpegMissingSearchedLabel => Get();
+    public string FFmpegDownloadingTitle => Get();
+    public string FFmpegDownloadCompletedTitle => Get();
     public string NothingFoundTitle => Get();
     public string NothingFoundMessage => Get();
     public string ErrorTitle => Get();

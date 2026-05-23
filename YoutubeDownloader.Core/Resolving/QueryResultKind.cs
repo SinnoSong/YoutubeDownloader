@@ -1,4 +1,4 @@
-﻿namespace YoutubeDownloader.Core.Resolving;
+namespace YoutubeDownloader.Core.Resolving;
 
 public enum QueryResultKind
 {

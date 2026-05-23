@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using Avalonia.Interactivity;
 using Avalonia.WebView.Windows.Core;
@@ -11,15 +11,16 @@ namespace YoutubeDownloader.Views.Dialogs;
 
 public partial class AuthSetupView : UserControl<AuthSetupViewModel>
 {
-    private const string HomePageUrl = "https://www.youtube.com";
-    private static readonly string LoginPageUrl =
-        $"https://accounts.google.com/ServiceLogin?continue={Uri.EscapeDataString(HomePageUrl)}";
+    private static readonly Uri HomePageUri = new("https://www.youtube.com");
+    private static readonly Uri LoginPageUri = new(
+        $"https://accounts.google.com/ServiceLogin?continue={Uri.EscapeDataString(HomePageUri.AbsoluteUri)}"
+    );
 
     private CoreWebView2? _coreWebView2;
 
     public AuthSetupView() => InitializeComponent();
 
-    private void NavigateToLoginPage() => WebBrowser.Url = new Uri(LoginPageUrl);
+    private void NavigateToLoginPage() => WebBrowser.Url = LoginPageUri;
 
     private void LogOutButton_OnClick(object sender, RoutedEventArgs args)
     {
@@ -59,16 +60,25 @@ public partial class AuthSetupView : UserControl<AuthSetupViewModel>
             return;
 
         // Reset existing browser cookies if the user is attempting to log in (again)
-        if (string.Equals(args.Url?.AbsoluteUri, LoginPageUrl, StringComparison.OrdinalIgnoreCase))
+        if (
+            string.Equals(
+                args.Url?.AbsoluteUri,
+                LoginPageUri.AbsoluteUri,
+                StringComparison.OrdinalIgnoreCase
+            )
+        )
+        {
             _coreWebView2.CookieManager.DeleteAllCookies();
+        }
 
         // Extract the cookies after being redirected to the home page (i.e. after logging in)
         if (
-            args.Url?.AbsoluteUri.StartsWith(HomePageUrl, StringComparison.OrdinalIgnoreCase)
-            == true
+            args.Url is { } url
+            && string.Equals(url.Scheme, HomePageUri.Scheme, StringComparison.OrdinalIgnoreCase)
+            && string.Equals(url.Host, HomePageUri.Host, StringComparison.OrdinalIgnoreCase)
         )
         {
-            var cookies = await _coreWebView2!.CookieManager.GetCookiesAsync(args.Url.AbsoluteUri);
+            var cookies = await _coreWebView2!.CookieManager.GetCookiesAsync(url.AbsoluteUri);
             DataContext.Cookies = cookies.Select(c => c.ToSystemNetCookie()).ToArray();
         }
     }

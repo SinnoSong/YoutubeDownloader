@@ -1,4 +1,4 @@
-﻿namespace YoutubeDownloader.Framework;
+namespace YoutubeDownloader.Framework;
 
 public enum ThemeVariant
 {

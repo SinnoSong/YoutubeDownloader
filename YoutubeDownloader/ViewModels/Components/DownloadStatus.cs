@@ -1,4 +1,4 @@
-﻿namespace YoutubeDownloader.ViewModels.Components;
+namespace YoutubeDownloader.ViewModels.Components;
 
 public enum DownloadStatus
 {

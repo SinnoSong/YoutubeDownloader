@@ -1,12 +1,14 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
+using Avalonia.Input.Platform;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using PowerKit.Extensions;
 using YoutubeDownloader.Core.Downloading;
 using YoutubeDownloader.Framework;
 using YoutubeDownloader.Localization;
@@ -49,12 +51,13 @@ public partial class DownloadMultipleSetupViewModel(
         // Without .AsEnumerable(), the below line throws a compile-time error starting with .NET SDK v9.0.200
         Enum.GetValues<VideoQualityPreference>().AsEnumerable().Reverse().ToArray();
 
-    [RelayCommand]
-    private void Initialize()
+    public override Task InitializeAsync()
     {
         SelectedContainer = settingsService.LastContainer;
         SelectedVideoQualityPreference = settingsService.LastVideoQualityPreference;
         SelectedVideos.CollectionChanged += (_, _) => ConfirmCommand.NotifyCanExecuteChanged();
+
+        return Task.CompletedTask;
     }
 
     [RelayCommand]
@@ -74,10 +77,8 @@ public partial class DownloadMultipleSetupViewModel(
             return;
 
         var downloads = new List<DownloadViewModel>();
-        for (var i = 0; i < SelectedVideos.Count; i++)
+        foreach (var (i, video) in SelectedVideos.Index())
         {
-            var video = SelectedVideos[i];
-
             var baseFilePath = Path.Combine(
                 dirPath,
                 FileNameTemplate.Apply(
@@ -94,11 +95,11 @@ public partial class DownloadMultipleSetupViewModel(
             var filePath = Path.EnsureUniqueFilePath(baseFilePath);
 
             // Download does not start immediately, so lock in the file path to avoid conflicts
-            Directory.CreateDirectoryForFile(filePath);
+            Directory.CreateForFile(filePath);
             await File.WriteAllBytesAsync(filePath, []);
 
             downloads.Add(
-                viewModelManager.CreateDownloadViewModel(
+                viewModelManager.GetDownloadViewModel(
                     video,
                     new VideoDownloadPreference(SelectedContainer, SelectedVideoQualityPreference),
                     filePath

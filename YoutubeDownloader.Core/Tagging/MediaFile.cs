@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using TagLib;
 using TagFile = TagLib.File;
 

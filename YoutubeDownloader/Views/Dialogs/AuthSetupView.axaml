@@ -28,7 +28,8 @@
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     IsVisible="{Binding IsAuthenticated}"
-                    Orientation="Vertical">
+                    Orientation="Vertical"
+                    Spacing="16">
                     <materialIcons:MaterialIcon
                         Width="196"
                         Height="196"
@@ -47,7 +48,6 @@
                     <!--  Log out  -->
                     <Button
                         x:Name="LogOutButton"
-                        Margin="16"
                         HorizontalAlignment="Center"
                         Click="LogOutButton_OnClick"
                         Content="{Binding LocalizationManager.LogOutButton}"

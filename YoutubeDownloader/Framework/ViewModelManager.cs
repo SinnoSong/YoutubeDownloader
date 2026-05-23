@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
+using PowerKit.Extensions;
 using YoutubeDownloader.Core.Downloading;
-using YoutubeDownloader.Core.Utils.Extensions;
 using YoutubeDownloader.ViewModels;
 using YoutubeDownloader.ViewModels.Components;
 using YoutubeDownloader.ViewModels.Dialogs;
@@ -12,15 +12,15 @@ namespace YoutubeDownloader.Framework;
 
 public class ViewModelManager(IServiceProvider services)
 {
-    public MainViewModel CreateMainViewModel() => services.GetRequiredService<MainViewModel>();
+    public MainViewModel GetMainViewModel() => services.GetRequiredService<MainViewModel>();
 
-    public DashboardViewModel CreateDashboardViewModel() =>
+    public DashboardViewModel GetDashboardViewModel() =>
         services.GetRequiredService<DashboardViewModel>();
 
-    public AuthSetupViewModel CreateAuthSetupViewModel() =>
+    public AuthSetupViewModel GetAuthSetupViewModel() =>
         services.GetRequiredService<AuthSetupViewModel>();
 
-    public DownloadViewModel CreateDownloadViewModel(
+    public DownloadViewModel GetDownloadViewModel(
         IVideo video,
         VideoDownloadOption downloadOption,
         string filePath
@@ -35,7 +35,7 @@ public class ViewModelManager(IServiceProvider services)
         return viewModel;
     }
 
-    public DownloadViewModel CreateDownloadViewModel(
+    public DownloadViewModel GetDownloadViewModel(
         IVideo video,
         VideoDownloadPreference downloadPreference,
         string filePath
@@ -50,7 +50,7 @@ public class ViewModelManager(IServiceProvider services)
         return viewModel;
     }
 
-    public DownloadMultipleSetupViewModel CreateDownloadMultipleSetupViewModel(
+    public DownloadMultipleSetupViewModel GetDownloadMultipleSetupViewModel(
         string title,
         IReadOnlyList<IVideo> availableVideos,
         bool preselectVideos = true
@@ -67,7 +67,7 @@ public class ViewModelManager(IServiceProvider services)
         return viewModel;
     }
 
-    public DownloadSingleSetupViewModel CreateDownloadSingleSetupViewModel(
+    public DownloadSingleSetupViewModel GetDownloadSingleSetupViewModel(
         IVideo video,
         IReadOnlyList<VideoDownloadOption> availableDownloadOptions
     )
@@ -80,7 +80,7 @@ public class ViewModelManager(IServiceProvider services)
         return viewModel;
     }
 
-    public MessageBoxViewModel CreateMessageBoxViewModel(
+    public MessageBoxViewModel GetMessageBoxViewModel(
         string title,
         string message,
         string? okButtonText,
@@ -97,7 +97,7 @@ public class ViewModelManager(IServiceProvider services)
         return viewModel;
     }
 
-    public MessageBoxViewModel CreateMessageBoxViewModel(string title, string message)
+    public MessageBoxViewModel GetMessageBoxViewModel(string title, string message)
     {
         var viewModel = services.GetRequiredService<MessageBoxViewModel>();
 
@@ -107,6 +107,6 @@ public class ViewModelManager(IServiceProvider services)
         return viewModel;
     }
 
-    public SettingsViewModel CreateSettingsViewModel() =>
+    public SettingsViewModel GetSettingsViewModel() =>
         services.GetRequiredService<SettingsViewModel>();
 }

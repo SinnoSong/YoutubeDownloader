@@ -29,7 +29,7 @@
                         ToolTip.Tip="{Binding LocalizationManager.ThemeTooltip}">
                         <TextBlock DockPanel.Dock="Left" Text="{Binding LocalizationManager.ThemeLabel}" />
                         <ComboBox
-                            Width="150"
+                            Width="160"
                             DockPanel.Dock="Right"
                             ItemsSource="{Binding AvailableThemes}"
                             SelectedItem="{Binding Theme}" />
@@ -42,10 +42,16 @@
                         ToolTip.Tip="{Binding LocalizationManager.LanguageTooltip}">
                         <TextBlock DockPanel.Dock="Left" Text="{Binding LocalizationManager.LanguageLabel}" />
                         <ComboBox
-                            Width="150"
+                            Width="160"
                             DockPanel.Dock="Right"
                             ItemsSource="{Binding AvailableLanguages}"
-                            SelectedItem="{Binding Language}" />
+                            SelectedItem="{Binding Language}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Converter={x:Static converters:LanguageToStringConverter.Instance}}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
                     </DockPanel>
 
                     <!--  Auto-updates  -->
@@ -61,10 +67,7 @@
                     </DockPanel>
 
                     <!--  Persist authentication  -->
-                    <DockPanel
-                        IsVisible="{OnPlatform False,
-                                               Windows=True}"
-                        LastChildFill="False">
+                    <DockPanel IsVisible="{OnPlatform False, Windows=True}" LastChildFill="False">
                         <ToolTip.Tip>
                             <TextBlock Inlines="{Binding LocalizationManager.PersistAuthTooltip, Converter={x:Static converters:MarkdownToInlinesConverter.Instance}}" />
                         </ToolTip.Tip>
@@ -89,9 +92,9 @@
                             Height="20"
                             DockPanel.Dock="Right"
                             FontSize="13"
+                            PlaceholderText="{Binding LocalizationManager.FFmpegPathPlaceholderText}"
                             Text="{Binding FFmpegFilePath}"
-                            Theme="{DynamicResource CompactTextBox}"
-                            Watermark="{Binding LocalizationManager.FFmpegPathWatermark}">
+                            Theme="{DynamicResource CompactTextBox}">
                             <TextBox.InnerRightContent>
                                 <StackPanel Orientation="Horizontal">
                                     <Button
@@ -231,8 +234,11 @@
                         LastChildFill="False"
                         ToolTip.Tip="{Binding LocalizationManager.ParallelLimitTooltip}">
                         <TextBlock DockPanel.Dock="Left" Text="{Binding LocalizationManager.ParallelLimitLabel}" />
-                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                            <TextBlock Margin="10,0" Text="{Binding ParallelLimit}" />
+                        <StackPanel
+                            DockPanel.Dock="Right"
+                            Orientation="Horizontal"
+                            Spacing="10">
+                            <TextBlock Text="{Binding ParallelLimit}" />
                             <Slider
                                 Width="150"
                                 IsSnapToTickEnabled="True"

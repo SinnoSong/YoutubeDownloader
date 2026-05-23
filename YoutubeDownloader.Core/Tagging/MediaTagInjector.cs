@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using PowerKit.Extensions;
 using YoutubeDownloader.Core.Utils;
 using YoutubeDownloader.Core.Utils.Extensions;
 using YoutubeExplode.Videos;

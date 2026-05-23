@@ -9,8 +9,7 @@
     xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
     x:Name="UserControl"
     Width="500"
-    x:DataType="dialogs:DownloadMultipleSetupViewModel"
-    Loaded="UserControl_OnLoaded">
+    x:DataType="dialogs:DownloadMultipleSetupViewModel">
     <Grid RowDefinitions="Auto,*,Auto,Auto">
         <!--  Title  -->
         <TextBlock
@@ -57,7 +56,8 @@
                             <StackPanel
                                 Grid.Column="1"
                                 Margin="8,0,0,0"
-                                Orientation="Vertical">
+                                Orientation="Vertical"
+                                Spacing="8">
                                 <!--  Title  -->
                                 <TextBlock
                                     FontSize="16"
@@ -65,30 +65,28 @@
                                     TextTrimming="CharacterEllipsis"
                                     ToolTip.Tip="{Binding Title}" />
 
-                                <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
                                     <!--  Author  -->
-                                    <StackPanel Orientation="Horizontal">
+                                    <StackPanel Orientation="Horizontal" Spacing="3">
                                         <materialIcons:MaterialIcon
                                             Width="16"
                                             Height="16"
                                             BorderThickness="1"
                                             Kind="UserOutline" />
                                         <TextBlock
-                                            Margin="3,0,0,0"
                                             FontWeight="Light"
                                             Text="{Binding Author.Title}"
                                             TextTrimming="CharacterEllipsis" />
                                     </StackPanel>
 
                                     <!--  Duration  -->
-                                    <StackPanel Margin="8,0,0,0" Orientation="Horizontal">
+                                    <StackPanel Orientation="Horizontal" Spacing="3">
                                         <materialIcons:MaterialIcon
                                             Width="16"
                                             Height="16"
                                             BorderThickness="1"
                                             Kind="ClockOutline" />
                                         <TextBlock
-                                            Margin="3,0,0,0"
                                             FontWeight="Light"
                                             Text="{Binding Duration, TargetNullValue=Live}"
                                             TextTrimming="CharacterEllipsis" />
@@ -113,11 +111,11 @@
         <!--  Preferences  -->
         <UniformGrid
             Grid.Row="2"
-            Margin="16"
+            Margin="8"
             Columns="2">
             <!--  Container preference  -->
             <ComboBox
-                Margin="0,0,8,0"
+                Margin="8"
                 materialAssists:ComboBoxAssist.Label="{Binding LocalizationManager.ContainerLabel}"
                 ItemsSource="{Binding AvailableContainers}"
                 SelectedItem="{Binding SelectedContainer}"
@@ -125,7 +123,7 @@
 
             <!--  Video quality preference  -->
             <ComboBox
-                Margin="8,0,0,0"
+                Margin="8"
                 materialAssists:ComboBoxAssist.Label="{Binding LocalizationManager.VideoQualityLabel}"
                 IsEnabled="{Binding !SelectedContainer.IsAudioOnly}"
                 ItemsSource="{Binding AvailableVideoQualityPreferences}"
@@ -140,14 +138,13 @@
         </UniformGrid>
 
         <!--  Buttons  -->
-        <StackPanel
+        <UniformGrid
             Grid.Row="3"
-            Margin="16,8,16,16"
-            HorizontalAlignment="Right"
-            Orientation="Horizontal">
+            Margin="8"
+            Columns="2">
             <!--  Download  -->
             <Button
-                Margin="0,0,8,0"
+                Margin="8"
                 Command="{Binding ConfirmCommand}"
                 IsDefault="True"
                 Theme="{DynamicResource MaterialOutlineButton}">
@@ -161,11 +158,11 @@
 
             <!--  Cancel  -->
             <Button
-                Margin="8,0,0,0"
+                Margin="8"
                 Command="{Binding CloseCommand}"
                 Content="{Binding LocalizationManager.CancelButton}"
                 IsCancel="True"
                 Theme="{DynamicResource MaterialOutlineButton}" />
-        </StackPanel>
+        </UniformGrid>
     </Grid>
 </UserControl>

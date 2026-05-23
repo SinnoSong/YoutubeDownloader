@@ -9,14 +9,14 @@
     xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
     x:Name="UserControl"
     Width="500"
-    x:DataType="dialogs:DownloadSingleSetupViewModel"
-    Loaded="UserControl_OnLoaded">
+    x:DataType="dialogs:DownloadSingleSetupViewModel">
     <Grid RowDefinitions="Auto,*,Auto,Auto">
         <!--  Info  -->
         <StackPanel
             Grid.Row="0"
             Margin="16"
-            Orientation="Vertical">
+            Orientation="Vertical"
+            Spacing="8">
             <!--  Title  -->
             <TextBlock
                 FontSize="19"
@@ -30,30 +30,28 @@
                 </TextBlock.ContextMenu>
             </TextBlock>
 
-            <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
+            <StackPanel Orientation="Horizontal" Spacing="16">
                 <!--  Author  -->
-                <StackPanel Orientation="Horizontal">
+                <StackPanel Orientation="Horizontal" Spacing="3">
                     <materialIcons:MaterialIcon
                         Width="16"
                         Height="16"
                         BorderThickness="1"
                         Kind="UserOutline" />
                     <TextBlock
-                        Margin="3,0,0,0"
                         FontWeight="Light"
                         Text="{Binding Video.Author.Title}"
                         TextTrimming="CharacterEllipsis" />
                 </StackPanel>
 
                 <!--  Duration  -->
-                <StackPanel Margin="16,0,0,0" Orientation="Horizontal">
+                <StackPanel Orientation="Horizontal" Spacing="3">
                     <materialIcons:MaterialIcon
                         Width="16"
                         Height="16"
                         BorderThickness="1"
                         Kind="ClockOutline" />
                     <TextBlock
-                        Margin="3,0,0,0"
                         FontWeight="Light"
                         Text="{Binding Video.Duration, TargetNullValue=Live}"
                         TextTrimming="CharacterEllipsis" />
@@ -80,39 +78,50 @@
             Theme="{DynamicResource MaterialFilledComboBox}">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock>
-                        <!--  Video quality  -->
-                        <Run Classes.audioOnly="{Binding IsAudioOnly}">
-                            <Run.Styles>
-                                <Style Selector="Run">
-                                    <Setter Property="Text" Value="{Binding VideoQuality, Mode=OneWay}" />
+                    <StackPanel Spacing="2">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <!--  Video quality / audio-only label  -->
+                            <TextBlock Classes.audioOnly="{Binding IsAudioOnly}" FontWeight="SemiBold">
+                                <TextBlock.Styles>
+                                    <Style Selector="TextBlock">
+                                        <Setter Property="Text" Value="{Binding VideoQuality, Mode=OneWay}" />
 
-                                    <Style Selector="^.audioOnly">
-                                        <Setter Property="Text" Value="Audio" />
+                                        <Style Selector="^.audioOnly">
+                                            <Setter Property="Text" Value="{Binding #UserControl.DataContext.LocalizationManager.AudioLabel}" />
+                                        </Style>
                                     </Style>
-                                </Style>
-                            </Run.Styles>
-                        </Run>
+                                </TextBlock.Styles>
+                            </TextBlock>
 
-                        <!--  Separator  -->
-                        <Run Text="—" />
+                            <!--  Upscaled badge  -->
+                            <Border
+                                Padding="6,1"
+                                BorderBrush="{DynamicResource MaterialDividerBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                IsVisible="{Binding IsVideoUpscaled}">
+                                <TextBlock
+                                    FontSize="11"
+                                    FontWeight="Medium"
+                                    Text="{Binding #UserControl.DataContext.LocalizationManager.UpscaledLabel}" />
+                            </Border>
+                        </StackPanel>
 
                         <!--  Container  -->
-                        <Run Text="{Binding Container, Mode=OneWay}" />
-                    </TextBlock>
+                        <TextBlock FontWeight="Light" Text="{Binding Container, Mode=OneWay}" />
+                    </StackPanel>
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>
 
         <!--  Buttons  -->
-        <StackPanel
+        <UniformGrid
             Grid.Row="3"
-            Margin="16,8,16,16"
-            HorizontalAlignment="Right"
-            Orientation="Horizontal">
+            Margin="8"
+            Columns="2">
             <!--  Download  -->
             <Button
-                Margin="0,0,8,0"
+                Margin="8"
                 Command="{Binding ConfirmCommand}"
                 Content="{Binding LocalizationManager.DownloadButton}"
                 IsDefault="True"
@@ -120,11 +129,11 @@
 
             <!--  Cancel  -->
             <Button
-                Margin="8,0,0,0"
+                Margin="8"
                 Command="{Binding CloseCommand}"
                 Content="{Binding LocalizationManager.CancelButton}"
                 IsCancel="True"
                 Theme="{DynamicResource MaterialOutlineButton}" />
-        </StackPanel>
+        </UniformGrid>
     </Grid>
 </UserControl>

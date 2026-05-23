@@ -1,19 +1,18 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using PowerKit.Extensions;
 using YoutubeDownloader.Framework;
 using YoutubeDownloader.Localization;
 using YoutubeDownloader.Services;
-using YoutubeDownloader.Utils;
-using YoutubeDownloader.Utils.Extensions;
 
 namespace YoutubeDownloader.ViewModels.Dialogs;
 
 public class AuthSetupViewModel : DialogViewModelBase
 {
     private readonly SettingsService _settingsService;
-    private readonly DisposableCollector _eventRoot = new();
+    private readonly IDisposable _eventSubscription;
 
     public AuthSetupViewModel(
         LocalizationManager localizationManager,
@@ -23,15 +22,13 @@ public class AuthSetupViewModel : DialogViewModelBase
         LocalizationManager = localizationManager;
         _settingsService = settingsService;
 
-        _eventRoot.Add(
-            _settingsService.WatchProperty(
-                o => o.LastAuthCookies,
-                () =>
-                {
-                    OnPropertyChanged(nameof(Cookies));
-                    OnPropertyChanged(nameof(IsAuthenticated));
-                }
-            )
+        _eventSubscription = _settingsService.WatchProperty(
+            o => o.LastAuthCookies,
+            _ =>
+            {
+                OnPropertyChanged(nameof(Cookies));
+                OnPropertyChanged(nameof(IsAuthenticated));
+            }
         );
     }
 
@@ -55,7 +52,7 @@ public class AuthSetupViewModel : DialogViewModelBase
     {
         if (disposing)
         {
-            _eventRoot.Dispose();
+            _eventSubscription.Dispose();
         }
 
         base.Dispose(disposing);

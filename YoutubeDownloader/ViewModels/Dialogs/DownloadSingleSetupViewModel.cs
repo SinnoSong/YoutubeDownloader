@@ -1,11 +1,13 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
+using Avalonia.Input.Platform;
 using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using PowerKit.Extensions;
 using YoutubeDownloader.Core.Downloading;
 using YoutubeDownloader.Framework;
 using YoutubeDownloader.Localization;
@@ -34,12 +36,13 @@ public partial class DownloadSingleSetupViewModel(
     [ObservableProperty]
     public partial VideoDownloadOption? SelectedDownloadOption { get; set; }
 
-    [RelayCommand]
-    private void Initialize()
+    public override Task InitializeAsync()
     {
         SelectedDownloadOption = AvailableDownloadOptions?.FirstOrDefault(o =>
             o.Container == settingsService.LastContainer
         );
+
+        return Task.CompletedTask;
     }
 
     [RelayCommand]
@@ -71,11 +74,11 @@ public partial class DownloadSingleSetupViewModel(
             return;
 
         // Download does not start immediately, so lock in the file path to avoid conflicts
-        Directory.CreateDirectoryForFile(filePath);
+        Directory.CreateForFile(filePath);
         await File.WriteAllBytesAsync(filePath, []);
 
         settingsService.LastContainer = container;
 
-        Close(viewModelManager.CreateDownloadViewModel(Video, SelectedDownloadOption, filePath));
+        Close(viewModelManager.GetDownloadViewModel(Video, SelectedDownloadOption, filePath));
     }
 }

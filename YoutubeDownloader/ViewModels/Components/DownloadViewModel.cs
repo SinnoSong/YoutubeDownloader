@@ -1,16 +1,17 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
+using Avalonia.Input.Platform;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Gress;
+using PowerKit.Extensions;
 using YoutubeDownloader.Core.Downloading;
 using YoutubeDownloader.Framework;
 using YoutubeDownloader.Localization;
-using YoutubeDownloader.Utils;
 using YoutubeDownloader.Utils.Extensions;
 using YoutubeExplode.Videos;
 
@@ -21,7 +22,7 @@ public partial class DownloadViewModel : ViewModelBase
     private readonly ViewModelManager _viewModelManager;
     private readonly DialogManager _dialogManager;
 
-    private readonly DisposableCollector _eventRoot = new();
+    private readonly IDisposable _eventSubscription;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
     private bool _isDisposed;
@@ -36,11 +37,9 @@ public partial class DownloadViewModel : ViewModelBase
         _dialogManager = dialogManager;
         LocalizationManager = localizationManager;
 
-        _eventRoot.Add(
-            Progress.WatchProperty(
-                o => o.Current,
-                () => OnPropertyChanged(nameof(IsProgressIndeterminate))
-            )
+        _eventSubscription = Progress.WatchProperty(
+            o => o.Current,
+            _ => OnPropertyChanged(nameof(IsProgressIndeterminate))
         );
     }
 
@@ -110,10 +109,7 @@ public partial class DownloadViewModel : ViewModelBase
         catch (Exception ex)
         {
             await _dialogManager.ShowDialogAsync(
-                _viewModelManager.CreateMessageBoxViewModel(
-                    LocalizationManager.ErrorTitle,
-                    ex.Message
-                )
+                _viewModelManager.GetMessageBoxViewModel(LocalizationManager.ErrorTitle, ex.Message)
             );
         }
     }
@@ -133,10 +129,7 @@ public partial class DownloadViewModel : ViewModelBase
         catch (Exception ex)
         {
             await _dialogManager.ShowDialogAsync(
-                _viewModelManager.CreateMessageBoxViewModel(
-                    LocalizationManager.ErrorTitle,
-                    ex.Message
-                )
+                _viewModelManager.GetMessageBoxViewModel(LocalizationManager.ErrorTitle, ex.Message)
             );
         }
     }
@@ -153,14 +146,12 @@ public partial class DownloadViewModel : ViewModelBase
 
     protected override void Dispose(bool disposing)
     {
-        if (disposing)
-        {
-            _eventRoot.Dispose();
-            _cancellationTokenSource.Dispose();
+        if (_isDisposed)
+            return;
 
-            _isDisposed = true;
-        }
+        _isDisposed = true;
 
-        base.Dispose(disposing);
+        _eventSubscription.Dispose();
+        _cancellationTokenSource.Dispose();
     }
 }

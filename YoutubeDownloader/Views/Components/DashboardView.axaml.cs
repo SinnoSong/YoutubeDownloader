@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using PowerKit.Extensions;
 using YoutubeDownloader.Framework;
 using YoutubeDownloader.ViewModels.Components;
 
@@ -25,13 +26,13 @@ public partial class DashboardView : UserControl<DashboardViewModel>
         if (args.Key == Key.Enter && args.KeyModifiers != KeyModifiers.Shift)
         {
             args.Handled = true;
-            ProcessQueryButton.Command?.Execute(ProcessQueryButton.CommandParameter);
+            ProcessQueryButton.Command?.ExecuteIfCan(ProcessQueryButton.CommandParameter);
         }
     }
 
     private void StatusTextBlock_OnPointerReleased(object sender, PointerReleasedEventArgs args)
     {
         if (sender is IDataContextProvider { DataContext: DownloadViewModel dataContext })
-            dataContext.CopyErrorMessageCommand.Execute(null);
+            dataContext.CopyErrorMessageCommand.ExecuteIfCan(null);
     }
 }

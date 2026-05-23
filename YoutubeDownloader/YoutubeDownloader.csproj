@@ -1,18 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <ApplicationIcon>..\favicon.ico</ApplicationIcon>
+    <ApplicationIcon>../favicon.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <!-- Trimmed builds break support for Windows 10 for some reason -->
     <!-- https://github.com/Tyrrrz/YoutubeDownloader/issues/496 -->
     <PublishTrimmed>false</PublishTrimmed>
     <CopyOutputSymbolsToPublishDirectory>false</CopyOutputSymbolsToPublishDirectory>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
-    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
 
   <PropertyGroup>
-    <DownloadFFmpeg>true</DownloadFFmpeg>
     <PublishMacOSBundle>false</PublishMacOSBundle>
   </PropertyGroup>
 
@@ -26,16 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <AvaloniaResource Include="..\favicon.ico" Link="favicon.ico" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None
-      Include="ffmpeg.exe"
-      CopyToOutputDirectory="PreserveNewest"
-      Condition="Exists('ffmpeg.exe')"
-    />
-    <None Include="ffmpeg" CopyToOutputDirectory="PreserveNewest" Condition="Exists('ffmpeg')" />
+    <AvaloniaResource Include="../favicon.ico" Link="favicon.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -43,7 +32,6 @@
     <PackageReference Include="Avalonia" />
     <PackageReference Include="Avalonia.Controls.DataGrid" />
     <PackageReference Include="Avalonia.Desktop" />
-    <PackageReference Include="Avalonia.Diagnostics" Condition="'$(Configuration)' == 'Debug'" />
     <PackageReference Include="Cogwheel" />
     <PackageReference Include="CommunityToolkit.Mvvm" />
     <PackageReference Include="CSharpier.MsBuild" PrivateAssets="all" />
@@ -56,13 +44,14 @@
     <PackageReference Include="Material.Icons.Avalonia" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Onova" />
+    <PackageReference Include="PowerKit" />
     <PackageReference Include="ThisAssembly.Project" PrivateAssets="all" />
     <PackageReference Include="WebView.Avalonia" />
     <PackageReference Include="WebView.Avalonia.Desktop" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\YoutubeDownloader.Core\YoutubeDownloader.Core.csproj" />
+    <ProjectReference Include="../YoutubeDownloader.Core/YoutubeDownloader.Core.csproj" />
   </ItemGroup>
 
   <!-- Avalonia.WebView is completely incompatible with trimming -->
@@ -79,38 +68,10 @@
     <TrimmerRootAssembly Include="WebView.Core" />
   </ItemGroup>
 
-  <!-- Download FFmpeg -->
-  <Target
-    Name="DownloadFFmpeg"
-    BeforeTargets="PreBuildEvent"
-    Condition="$(DownloadFFmpeg) AND !Exists('ffmpeg.exe') AND !Exists('ffmpeg')"
-  >
-    <Exec
-      Command="pwsh -ExecutionPolicy Bypass -File $(ProjectDir)/Download-FFmpeg.ps1 -Platform $(RuntimeIdentifier) -OutputPath $(ProjectDir)"
-      LogStandardErrorAsError="true"
-      Condition="'$(RuntimeIdentifier)' != ''"
-    />
-    <Exec
-      Command="pwsh -ExecutionPolicy Bypass -File $(ProjectDir)/Download-FFmpeg.ps1 -OutputPath $(ProjectDir)"
-      LogStandardErrorAsError="true"
-      Condition="'$(RuntimeIdentifier)' == ''"
-    />
-
-    <!-- Update FFmpeg references so that the files get copied to the output within the same build sequence -->
-    <ItemGroup>
-      <None
-        Include="ffmpeg.exe"
-        CopyToOutputDirectory="PreserveNewest"
-        Condition="Exists('ffmpeg.exe')"
-      />
-      <None Include="ffmpeg" CopyToOutputDirectory="PreserveNewest" Condition="Exists('ffmpeg')" />
-    </ItemGroup>
-  </Target>
-
   <!-- Publish macOS bundle -->
   <Target Name="PublishMacOSBundle" AfterTargets="Publish" Condition="$(PublishMacOSBundle)">
     <Exec
-      Command="pwsh -ExecutionPolicy Bypass -File $(ProjectDir)/Publish-MacOSBundle.ps1 -PublishDirPath $(PublishDir) -IconsFilePath $(ProjectDir)/../favicon.icns -FullVersion $(Version) -ShortVersion $(AssemblyVersion)"
+      Command="dotnet run --file &quot;$(ProjectDir)PublishMacOSBundle.csx&quot; -- --publish-dir &quot;$(PublishDir)&quot; --icons-file &quot;$(ProjectDir)../favicon.icns&quot; --full-version $(Version) --short-version $(AssemblyVersion)"
       LogStandardErrorAsError="true"
     />
   </Target>

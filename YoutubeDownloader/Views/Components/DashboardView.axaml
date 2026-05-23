@@ -24,11 +24,11 @@
                         AcceptsReturn="True"
                         FontSize="16"
                         MaxLines="4"
+                        PlaceholderText="{Binding LocalizationManager.QueryPlaceholderText}"
                         ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                         Text="{Binding Query}"
                         Theme="{DynamicResource SoloTextBox}"
-                        ToolTip.Tip="{Binding LocalizationManager.QueryTooltip}"
-                        Watermark="{Binding LocalizationManager.QueryWatermark}">
+                        ToolTip.Tip="{Binding LocalizationManager.QueryTooltip}">
                         <TextBox.InnerLeftContent>
                             <materialIcons:MaterialIcon
                                 Width="24"

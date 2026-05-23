@@ -27,10 +27,11 @@ This application uses [**YoutubeExplode**](https://github.com/Tyrrrz/YoutubeExpl
 
 - 🟢 **[Stable release](https://github.com/SinnoSong/YoutubeDownloader/releases/latest)**
 - 🟠 [CI build](https://github.com/SinnoSong/YoutubeDownloader/actions/workflows/main.yml)
-
 > **重要**:
 > 在MacOS上运行当前程序，需要先将下载的文件移出隔离区。
 > 你可以通过在终端中运行以下命令来完成：`xattr -rd com.apple.quarantine YoutubeDownloader.app`。
+- 📦 [Scoop](https://scoop.sh/#/apps?q=YoutubeDownloader&p=1&id=2c0182d9ff5edefc525a57d50ead470d8f02184f): `scoop install extras/youtubedownloader` (community-maintained)
+- 📦 [AUR](https://aur.archlinux.org/packages/youtubedownloader): `yay -S youtubedownloader` (community-maintained)
 
 > **注意**:
 > 如果你不确定哪个版本适合你的系统，请参考 [这个页面](https://useragent.cc) 来确定你的操作系统和CPU架构。
@@ -45,7 +46,6 @@ This application uses [**YoutubeExplode**](https://github.com/Tyrrrz/YoutubeExpl
 - 自动嵌入字幕
 - 自动注入媒体标签
 - 登录youtube账户访问私人视频
-
 新增功能：
 
 - 下载视频封面
