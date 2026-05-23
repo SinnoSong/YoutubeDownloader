@@ -34,14 +34,14 @@ jobs:
       # Build the project separately to discern between build and format errors
       - name: Build
         run: >
-          dotnet build
+          dotnet build ./YoutubeDownloader/YoutubeDownloader.csproj
           -p:CSharpier_Bypass=true
           --configuration Release
 
       - name: Verify formatting
         id: verify
         run: >
-          dotnet build
+          dotnet build ./YoutubeDownloader/YoutubeDownloader.csproj
           -t:CSharpierFormat
           --configuration Release
           --no-restore
