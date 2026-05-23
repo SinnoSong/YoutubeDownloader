@@ -13,7 +13,7 @@ public class MediaTagInjector
 {
     private readonly MusicBrainzClient _musicBrainz = new();
 
-    private void InjectMiscMetadata(MediaFile mediaFile, IVideo video)
+    private void InjectDescription(MediaFile mediaFile, IVideo video)
     {
         var description = (video as Video)?.Description;
         if (!string.IsNullOrWhiteSpace(description))
@@ -82,7 +82,7 @@ public class MediaTagInjector
         );
     }
 
-    public async Task InjectTagsAsync(
+    public async Task InjectMetadataAsync(
         string filePath,
         IVideo video,
         CancellationToken cancellationToken = default
@@ -90,10 +90,20 @@ public class MediaTagInjector
     {
         using var mediaFile = MediaFile.Open(filePath);
 
-        InjectMiscMetadata(mediaFile, video);
+        InjectDescription(mediaFile, video);
         await InjectMusicMetadataAsync(mediaFile, video, cancellationToken);
-        await InjectThumbnailAsync(mediaFile, video, cancellationToken);
+        mediaFile.Save();
+    }
 
+    public async Task InjectThumbnailToFileAsync(
+        string filePath,
+        IVideo video,
+        CancellationToken cancellationToken = default
+    )
+    {
+        using var mediaFile = MediaFile.Open(filePath);
+
+        await InjectThumbnailAsync(mediaFile, video, cancellationToken);
         mediaFile.Save();
     }
 }

@@ -4,12 +4,12 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - prime
+      - master
     tags:
       - "*"
   pull_request:
     branches:
-      - prime
+      - master
 
 env:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
@@ -116,7 +116,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: >
           gh release create ${{ github.ref_name }}
-          --repo ${{ github.event.repository.full_name }}
+          --repo SinnoSong/YoutubeDownloader
           --title ${{ github.ref_name }}
           --generate-notes
           --verify-tag
@@ -172,27 +172,5 @@ jobs:
         run: >
           gh release upload ${{ github.ref_name }}
           YoutubeDownloader.${{ matrix.rid }}.zip
-          --repo ${{ github.event.repository.full_name }}
+          --repo SinnoSong/YoutubeDownloader
 
-  notify:
-    needs: deploy
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    permissions:
-      contents: read
-
-    steps:
-      - name: Notify Discord
-        uses: tyrrrz/action-http-request@25f132e48dea89c0f6b7955398270b506e1d51cb # 1.1.4
-        with:
-          url: ${{ secrets.DISCORD_WEBHOOK }}
-          method: POST
-          headers: |
-            Content-Type: application/json; charset=UTF-8
-          body: |
-            {
-              "avatar_url": "https://raw.githubusercontent.com/${{ github.event.repository.full_name }}/${{ github.ref_name }}/favicon.png",
-              "content": "[**${{ github.event.repository.name }}**](<${{ github.event.repository.html_url }}>) v${{ github.ref_name }} has been released!"
-            }
-          retry-count: 5

@@ -99,6 +99,12 @@ public partial class SettingsViewModel : DialogViewModelBase
         set => _settingsService.ShouldDownloadClosedCaptions = value;
     }
 
+    public bool ShouldDownloadClosedCaptions
+    {
+        get => _settingsService.ShouldDownloadClosedCaptions;
+        set => _settingsService.ShouldDownloadClosedCaptions = value;
+    }
+
     public bool ShouldTranslateCCToChinese
     {
         get => _settingsService.ShouldTranslateCCToChinese;

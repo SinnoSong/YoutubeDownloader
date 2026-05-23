@@ -57,6 +57,19 @@ public partial class LocalizationManager
                 "Inject subtitles (if available) into downloaded files",
             [nameof(InjectTagsLabel)] = "Inject media tags",
             [nameof(InjectTagsTooltip)] = "Inject media tags (if available) into downloaded files",
+            [nameof(DownloadThumbnailLabel)] = "Download thumbnail",
+            [nameof(DownloadThumbnailTooltip)] =
+                "Download the video's thumbnail as a separate image file",
+            [nameof(DownloadClosedCaptionsLabel)] = "Download subtitles",
+            [nameof(DownloadClosedCaptionsTooltip)] =
+                "Download subtitles as a separate SRT file when available",
+            [nameof(TranslateClosedCaptionsLabel)] = "Translate subtitles to Chinese",
+            [nameof(TranslateClosedCaptionsTooltip)] =
+                "Translate downloaded subtitles into a Chinese SRT file when possible",
+            [nameof(TranslateKeyLabel)] = "Azure Translate key",
+            [nameof(TranslateKeyTooltip)] = "Translation API key for Microsoft Azure Translator",
+            [nameof(BaiduAppIdLabel)] = "Baidu AppId",
+            [nameof(BaiduAppIdTooltip)] = "AppId for Baidu Translate API",
             [nameof(SkipExistingFilesLabel)] = "Skip existing files",
             [nameof(SkipExistingFilesTooltip)] =
                 "When downloading multiple videos, skip those that already have matching files in the output directory",

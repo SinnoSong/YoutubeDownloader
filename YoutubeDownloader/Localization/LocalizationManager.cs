@@ -119,6 +119,16 @@ public partial class LocalizationManager
     public string InjectSubtitlesTooltip => Get();
     public string InjectTagsLabel => Get();
     public string InjectTagsTooltip => Get();
+    public string DownloadThumbnailLabel => Get();
+    public string DownloadThumbnailTooltip => Get();
+    public string DownloadClosedCaptionsLabel => Get();
+    public string DownloadClosedCaptionsTooltip => Get();
+    public string TranslateClosedCaptionsLabel => Get();
+    public string TranslateClosedCaptionsTooltip => Get();
+    public string TranslateKeyLabel => Get();
+    public string TranslateKeyTooltip => Get();
+    public string BaiduAppIdLabel => Get();
+    public string BaiduAppIdTooltip => Get();
     public string SkipExistingFilesLabel => Get();
     public string SkipExistingFilesTooltip => Get();
     public string FileNameTemplateLabel => Get();

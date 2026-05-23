@@ -11,7 +11,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using YoutubeDownloader.Core.Utils;
-using YoutubeDownloader.Core.Utils.Extensions;
 using YoutubeExplode;
 using YoutubeExplode.Videos;
 
@@ -188,12 +187,16 @@ namespace YoutubeDownloader.Core.Downloading
             {
                 if (sb.Length + text.Length >= 6000)
                 {
-                    dict.AddRange(await BaiduTranslateAsync(sb.ToString(), key, appId));
+                    var part = await BaiduTranslateAsync(sb.ToString(), key, appId);
+                    foreach (var kv in part)
+                        dict[kv.Key] = kv.Value;
                     sb.Clear();
                 }
                 sb.AppendLine(text + "\n");
             }
-            dict.AddRange(await BaiduTranslateAsync(sb.ToString(), key, appId));
+            var lastPart = await BaiduTranslateAsync(sb.ToString(), key, appId);
+            foreach (var kv in lastPart)
+                dict[kv.Key] = kv.Value;
             for (int i = 0; i < textArr.Length; i++)
             {
                 var t = textArr[i];

@@ -154,8 +154,8 @@
                     <DockPanel
                         Margin="16,8"
                         LastChildFill="False"
-                        ToolTip.Tip="Download thumbnail into the path of downloaded files">
-                        <TextBlock DockPanel.Dock="Left" Text="Download Thumbnail" />
+                        ToolTip.Tip="{Binding LocalizationManager.DownloadThumbnailTooltip}">
+                        <TextBlock DockPanel.Dock="Left" Text="{Binding LocalizationManager.DownloadThumbnailLabel}" />
                         <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding ShouldDownloadThumbnail}" />
                     </DockPanel>
 
@@ -163,17 +163,17 @@
                     <DockPanel
                         Margin="16,8"
                         LastChildFill="False"
-                        ToolTip.Tip="Download subtitles into the path of downloaded files">
-                        <TextBlock DockPanel.Dock="Left" Text="Download subtitles" />
-                        <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding ShouldDownloadClosedCaption}" />
+                        ToolTip.Tip="{Binding LocalizationManager.DownloadClosedCaptionsTooltip}">
+                        <TextBlock DockPanel.Dock="Left" Text="{Binding LocalizationManager.DownloadClosedCaptionsLabel}" />
+                        <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding ShouldDownloadClosedCaptions}" />
                     </DockPanel>
 
                     <!--  Translate ClosedCaption to Chinese  -->
                     <DockPanel
                         Margin="16,8"
                         LastChildFill="False"
-                        ToolTip.Tip="Translate subtitles srt file to Chinese srt">
-                        <TextBlock DockPanel.Dock="Left" Text="Translate ClosedCaption to Chinese" />
+                        ToolTip.Tip="{Binding LocalizationManager.TranslateClosedCaptionsTooltip}">
+                        <TextBlock DockPanel.Dock="Left" Text="{Binding LocalizationManager.TranslateClosedCaptionsLabel}" />
                         <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding ShouldTranslateCCToChinese}" />
                     </DockPanel>
 
@@ -202,8 +202,8 @@
                     </DockPanel>
 
                     <!--  Translate key  -->
-                    <DockPanel Margin="16,8" LastChildFill="False" ToolTip.Tip="Translate Key for Microsoft Translate API">
-                        <TextBlock DockPanel.Dock="Left" Text="Azure Translate Key" />
+                    <DockPanel Margin="16,8" LastChildFill="False" ToolTip.Tip="{Binding LocalizationManager.TranslateKeyTooltip}">
+                        <TextBlock DockPanel.Dock="Left" Text="{Binding LocalizationManager.TranslateKeyLabel}" />
                         <TextBox
                             Width="150"
                             Height="20"
@@ -217,8 +217,8 @@
                     <DockPanel
                         Margin="16,8"
                         LastChildFill="False"
-                        ToolTip.Tip="AppId for Baidu Translate API">
-                        <TextBlock DockPanel.Dock="Left" Text="Baidu AppId" />
+                        ToolTip.Tip="{Binding LocalizationManager.BaiduAppIdTooltip}">
+                        <TextBlock DockPanel.Dock="Left" Text="{Binding LocalizationManager.BaiduAppIdLabel}" />
                         <TextBox
                             Width="150"
                             Height="20"

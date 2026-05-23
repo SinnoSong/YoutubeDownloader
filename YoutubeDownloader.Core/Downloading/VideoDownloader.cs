@@ -48,37 +48,55 @@ public class VideoDownloader(IReadOnlyList<Cookie>? initialCookies = null) : IDi
         string filePath,
         IVideo video,
         VideoDownloadOption downloadOption,
-        bool includeSubtitles = true,
         string? ffmpegPath = null,
         IProgress<Percentage>? progress = null,
         CancellationToken cancellationToken = default
     )
     {
-        // Include subtitles in the output container
-        var trackInfos = new List<ClosedCaptionTrackInfo>();
-        if (includeSubtitles && !downloadOption.Container.IsAudioOnly)
-        {
-            var manifest = await _youtube.Videos.ClosedCaptions.GetManifestAsync(
-                video.Id,
-                cancellationToken
-            );
-
-            trackInfos.AddRange(manifest.Tracks);
-        }
-
         var dirPath = Path.GetDirectoryName(filePath);
         if (!string.IsNullOrWhiteSpace(dirPath))
             Directory.CreateDirectory(dirPath);
 
         await _youtube.Videos.DownloadAsync(
             downloadOption.StreamInfos,
-            trackInfos,
+            [],
             new ConversionRequestBuilder(filePath)
                 .SetFFmpegPath(ffmpegPath ?? FFmpeg.TryGetCliFilePath() ?? "ffmpeg")
                 .SetContainer(downloadOption.Container)
                 .SetPreset(ConversionPreset.Medium)
                 .Build(),
             progress?.ToDoubleBased(),
+            cancellationToken
+        );
+    }
+
+    public async Task DownloadSubtitlesAsync(
+        string filePath,
+        IVideo video,
+        VideoDownloadOption downloadOption,
+        CancellationToken cancellationToken = default
+    )
+    {
+        if (downloadOption.Container.IsAudioOnly)
+            return;
+
+        var manifest = await _youtube.Videos.ClosedCaptions.GetManifestAsync(
+            video.Id,
+            cancellationToken
+        );
+
+        if (manifest.Tracks.Count == 0)
+            return;
+
+        await _youtube.Videos.DownloadAsync(
+            downloadOption.StreamInfos,
+            manifest.Tracks,
+            new ConversionRequestBuilder(filePath)
+                .SetFFmpegPath(FFmpeg.TryGetCliFilePath() ?? "ffmpeg")
+                .SetContainer(downloadOption.Container)
+                .SetPreset(ConversionPreset.Medium)
+                .Build(),
+            null,
             cancellationToken
         );
     }

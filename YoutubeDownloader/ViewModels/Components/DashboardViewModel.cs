@@ -17,6 +17,7 @@ using YoutubeDownloader.Core.Tagging;
 using YoutubeDownloader.Framework;
 using YoutubeDownloader.Localization;
 using YoutubeDownloader.Services;
+using YoutubeDownloader.Utils;
 using YoutubeDownloader.Utils.Extensions;
 using YoutubeExplode.Exceptions;
 
@@ -123,7 +124,6 @@ public partial class DashboardViewModel : ViewModelBase
                 Path.Combine(AppContext.BaseDirectory, FFmpeg.CliFileName),
                 progress
             );
-
             _snackbarManager.Notify(_localizationManager.FFmpegDownloadCompletedTitle);
         }
         catch (Exception ex)
@@ -183,17 +183,33 @@ public partial class DashboardViewModel : ViewModelBase
                 download.FilePath!,
                 download.Video!,
                 downloadOption,
-                _settingsService.ShouldInjectSubtitles,
                 _settingsService.FFmpegFilePath,
                 download.Progress.Merge(progress),
                 download.CancellationToken
             );
 
+            if (_settingsService.ShouldInjectSubtitles)
+            {
+                try
+                {
+                    await downloader.DownloadSubtitlesAsync(
+                        download.FilePath!,
+                        download.Video!,
+                        downloadOption,
+                        download.CancellationToken
+                    );
+                }
+                catch
+                {
+                    // Subtitles are optional
+                }
+            }
+
             if (_settingsService.ShouldInjectTags)
             {
                 try
                 {
-                    await tagInjector.InjectTagsAsync(
+                    await tagInjector.InjectMetadataAsync(
                         download.FilePath!,
                         download.Video!,
                         download.CancellationToken
@@ -205,43 +221,86 @@ public partial class DashboardViewModel : ViewModelBase
                 }
             }
 
+            if (_settingsService.ShouldInjectTags)
+            {
+                try
+                {
+                    await tagInjector.InjectThumbnailToFileAsync(
+                        download.FilePath!,
+                        download.Video!,
+                        download.CancellationToken
+                    );
+                }
+                catch
+                {
+                    // Embedded thumbnail is optional
+                }
+            }
+
             if (_settingsService.ShouldDownloadThumbnail)
             {
-                await _thumbnailDownloader.DownloadThumbnailAsync(
-                    download.FilePath!,
-                    download.Video!,
-                    download.CancellationToken
-                );
+                try
+                {
+                    await _thumbnailDownloader.DownloadThumbnailAsync(
+                        download.FilePath!,
+                        download.Video!,
+                        download.CancellationToken
+                    );
+                }
+                catch
+                {
+                    // Thumbnail is optional
+                }
             }
 
             if (_settingsService.ShouldDownloadClosedCaptions)
             {
-                var tuple = await _closedCaptionsDownloader.DownloadCCAsync(
-                    download.FilePath!,
-                    download.Video!,
-                    download.CancellationToken
-                );
+                string? captionFilePath = null;
+                var hasChineseCaptions = false;
+
+                try
+                {
+                    var tuple = await _closedCaptionsDownloader.DownloadCCAsync(
+                        download.FilePath!,
+                        download.Video!,
+                        download.CancellationToken
+                    );
+                    hasChineseCaptions = tuple.Item1;
+                    captionFilePath = tuple.Item2;
+                }
+                catch
+                {
+                    // Captions are optional
+                }
+
                 if (
                     !StringUtil.IsChineseTitle(download.Video!.Title)
-                    && !tuple.Item1
+                    && !hasChineseCaptions
                     && !string.IsNullOrWhiteSpace(_settingsService.TranslateKey)
-                    && !string.IsNullOrWhiteSpace(tuple.Item2)
+                    && !string.IsNullOrWhiteSpace(captionFilePath)
                 )
                 {
-                    if (!string.IsNullOrWhiteSpace(_settingsService.BaiduAppId))
+                    try
                     {
-                        await _translater.BaiduTranslateSrtAsync(
-                            tuple.Item2,
-                            _settingsService.TranslateKey,
-                            _settingsService.BaiduAppId
-                        );
+                        if (!string.IsNullOrWhiteSpace(_settingsService.BaiduAppId))
+                        {
+                            await _translater.BaiduTranslateSrtAsync(
+                                captionFilePath,
+                                _settingsService.TranslateKey,
+                                _settingsService.BaiduAppId
+                            );
+                        }
+                        else
+                        {
+                            await _translater.AzureTranslateSrtAsync(
+                                captionFilePath,
+                                _settingsService.TranslateKey
+                            );
+                        }
                     }
-                    else
+                    catch
                     {
-                        await _translater.AzureTranslateSrtAsync(
-                            tuple.Item2,
-                            _settingsService.TranslateKey
-                        );
+                        // Caption translation is optional
                     }
                 }
             }
@@ -250,24 +309,31 @@ public partial class DashboardViewModel : ViewModelBase
                 && !string.IsNullOrWhiteSpace(_settingsService.TranslateKey)
             )
             {
-                if (!string.IsNullOrWhiteSpace(_settingsService.BaiduAppId))
+                try
                 {
-                    await _translater.BaiduTranslateContentAsync(
-                        download.Video!,
-                        download.FilePath!,
-                        _settingsService.TranslateKey,
-                        _settingsService.BaiduAppId,
-                        download.CancellationToken
-                    );
+                    if (!string.IsNullOrWhiteSpace(_settingsService.BaiduAppId))
+                    {
+                        await _translater.BaiduTranslateContentAsync(
+                            download.Video!,
+                            download.FilePath!,
+                            _settingsService.TranslateKey,
+                            _settingsService.BaiduAppId,
+                            download.CancellationToken
+                        );
+                    }
+                    else
+                    {
+                        await _translater.AzureTranslateAsync(
+                            download.Video!,
+                            download.FilePath!,
+                            _settingsService.TranslateKey,
+                            download.CancellationToken
+                        );
+                    }
                 }
-                else
+                catch
                 {
-                    await _translater.AzureTranslateAsync(
-                        download.Video!,
-                        download.FilePath!,
-                        _settingsService.TranslateKey,
-                        download.CancellationToken
-                    );
+                    // Translated description/content is optional
                 }
             }
 
